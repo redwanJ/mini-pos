@@ -1,0 +1,212 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Business entity - represents a store/company
+model Business {
+  id            String   @id @default(cuid())
+  name          String
+  currency      String   @default("ETB")
+  taxRate       Float    @default(0)
+  receiptMessage String?
+  inviteCode    String   @unique @default(cuid())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  owner         User     @relation("BusinessOwner", fields: [ownerId], references: [id])
+  ownerId       String   @unique
+  members       BusinessMember[]
+  joinRequests  JoinRequest[]
+  products      Product[]
+  transactions  Transaction[]
+  categories    Category[]
+
+  @@index([inviteCode])
+}
+
+// User - authenticated via Telegram
+model User {
+  id            String   @id @default(cuid())
+  telegramId    BigInt   @unique
+  firstName     String
+  lastName      String?
+  username      String?
+  photoUrl      String?
+  languageCode  String   @default("en")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  ownedBusiness Business? @relation("BusinessOwner")
+  memberships   BusinessMember[]
+  joinRequests  JoinRequest[]
+  transactions  Transaction[]
+
+  @@index([telegramId])
+}
+
+// Business membership - links users to businesses with roles
+model BusinessMember {
+  id          String   @id @default(cuid())
+  role        Role     @default(STAFF)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Permissions
+  canAddProducts    Boolean @default(false)
+  canEditProducts   Boolean @default(false)
+  canDeleteProducts Boolean @default(false)
+  canViewReports    Boolean @default(false)
+  canManageStaff    Boolean @default(false)
+
+  // Relations
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String
+  business    Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  businessId  String
+
+  @@unique([userId, businessId])
+  @@index([businessId])
+}
+
+// Join request for pending business membership requests
+model JoinRequest {
+  id          String        @id @default(cuid())
+  status      RequestStatus @default(PENDING)
+  message     String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  // Relations
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String
+  business    Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  businessId  String
+
+  @@unique([userId, businessId])
+  @@index([businessId, status])
+}
+
+// Product category
+model Category {
+  id          String    @id @default(cuid())
+  name        String
+  createdAt   DateTime  @default(now())
+
+  // Relations
+  business    Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  businessId  String
+  products    Product[]
+
+  @@unique([businessId, name])
+  @@index([businessId])
+}
+
+// Product - inventory item
+model Product {
+  id                String   @id @default(cuid())
+  name              String
+  costPrice         Float
+  salePrice         Float
+  stock             Int      @default(0)
+  lowStockThreshold Int      @default(5)
+  qrCode            String   @unique @default(cuid())
+  imageUrl          String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  // Relations
+  business      Business   @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  businessId    String
+  category      Category?  @relation(fields: [categoryId], references: [id])
+  categoryId    String?
+  alerts        LowStockAlert[]
+  transactionItems TransactionItem[]
+
+  @@index([businessId])
+  @@index([qrCode])
+  @@index([businessId, name])
+}
+
+// Transaction - sale record
+model Transaction {
+  id            String   @id @default(cuid())
+  subtotal      Float
+  discount      Float    @default(0)
+  tax           Float    @default(0)
+  total         Float
+  profit        Float
+  paymentMethod PaymentMethod @default(CASH)
+  notes         String?
+  createdAt     DateTime @default(now())
+
+  // Relations
+  business      Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  businessId    String
+  staff         User?    @relation(fields: [staffId], references: [id])
+  staffId       String?
+  items         TransactionItem[]
+
+  @@index([businessId])
+  @@index([businessId, createdAt])
+}
+
+// Transaction item - individual items in a transaction
+model TransactionItem {
+  id            String   @id @default(cuid())
+  quantity      Int
+  unitPrice     Float
+  costPrice     Float
+  total         Float
+
+  // Relations
+  transaction   Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  transactionId String
+  product       Product     @relation(fields: [productId], references: [id])
+  productId     String
+  productName   String      // Denormalized for historical accuracy
+
+  @@index([transactionId])
+}
+
+// Low stock alert
+model LowStockAlert {
+  id          String   @id @default(cuid())
+  currentStock Int
+  threshold   Int
+  dismissed   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  // Relations
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId   String
+
+  @@index([productId])
+  @@index([dismissed])
+}
+
+// Enums
+enum Role {
+  OWNER
+  MANAGER
+  STAFF
+}
+
+enum RequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum PaymentMethod {
+  CASH
+  CARD
+  MOBILE
+  OTHER
+}
