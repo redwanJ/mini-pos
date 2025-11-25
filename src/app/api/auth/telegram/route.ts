@@ -53,7 +53,6 @@ export async function POST(request: NextRequest) {
       include: {
         ownedBusiness: true,
         memberships: {
-          where: { business: { isNot: null } },
           include: { business: true },
         },
         joinRequests: {

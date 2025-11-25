@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -53,35 +53,10 @@ export default function ScannerPage() {
     fetchBusiness();
   }, []);
 
-  useEffect(() => {
-    startScanner();
-    return () => {
-      stopScanner();
-    };
-  }, []);
+  // Ref to break circular dependency
+  const startScannerRef = useRef<() => Promise<void>>(async () => { });
 
-  async function startScanner() {
-    try {
-      const scanner = new Html5Qrcode('qr-scanner');
-      scannerRef.current = scanner;
-
-      await scanner.start(
-        { facingMode: 'environment' },
-        {
-          fps: 10,
-          qrbox: { width: 250, height: 250 },
-        },
-        handleScan,
-        () => {}
-      );
-      setScanning(true);
-    } catch (err) {
-      console.error('Failed to start scanner:', err);
-      setError('Failed to start camera');
-    }
-  }
-
-  async function stopScanner() {
+  const stopScanner = useCallback(async () => {
     if (scannerRef.current) {
       try {
         await scannerRef.current.stop();
@@ -91,9 +66,24 @@ export default function ScannerPage() {
       scannerRef.current = null;
     }
     setScanning(false);
-  }
+  }, []);
 
-  async function handleScan(decodedText: string) {
+  const resumeScanner = useCallback(() => {
+    setProduct(null);
+    setQuantity(1);
+    setError(null);
+    setSuccess(false);
+    if (scannerRef.current) {
+      try {
+        scannerRef.current.resume();
+      } catch {
+        // Restart if resume fails
+        stopScanner().then(() => startScannerRef.current());
+      }
+    }
+  }, [stopScanner]);
+
+  const handleScan = useCallback(async (decodedText: string) => {
     // Parse QR code
     let productId = parseQRData(decodedText);
     if (!productId) {
@@ -129,22 +119,42 @@ export default function ScannerPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [resumeScanner, t]);
 
-  function resumeScanner() {
-    setProduct(null);
-    setQuantity(1);
-    setError(null);
-    setSuccess(false);
-    if (scannerRef.current) {
-      try {
-        scannerRef.current.resume();
-      } catch {
-        // Restart if resume fails
-        stopScanner().then(startScanner);
-      }
+  const startScanner = useCallback(async () => {
+    try {
+      const scanner = new Html5Qrcode('qr-scanner');
+      scannerRef.current = scanner;
+
+      await scanner.start(
+        { facingMode: 'environment' },
+        {
+          fps: 10,
+          qrbox: { width: 250, height: 250 },
+        },
+        handleScan,
+        () => { }
+      );
+      setScanning(true);
+    } catch (err) {
+      console.error('Failed to start scanner:', err);
+      setError('Failed to start camera');
     }
-  }
+  }, [handleScan]);
+
+  // Update ref
+  useEffect(() => {
+    startScannerRef.current = startScanner;
+  }, [startScanner]);
+
+  useEffect(() => {
+    startScanner();
+    return () => {
+      stopScanner();
+    };
+  }, [startScanner, stopScanner]);
+
+
 
   async function handleDeductStock() {
     if (!product) return;

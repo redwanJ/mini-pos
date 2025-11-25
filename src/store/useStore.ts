@@ -12,7 +12,7 @@ import {
   getSettings,
   updateSettings as dbUpdateSettings,
   addAlert,
-} from '../lib/db';
+} from '../lib/api';
 
 interface AppState {
   // Products

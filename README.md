@@ -129,6 +129,23 @@ A modern, feature-rich Point of Sale and Inventory Management system built as a 
    npm run preview
    ```
 
+### Database Setup (Docker)
+
+This project uses PostgreSQL with Prisma ORM when running via Docker.
+
+1. **Generate Migrations** (First time setup)
+   Before running the application in Docker, you need to generate the initial migration files:
+   ```bash
+   # Make sure your local .env is configured correctly
+   npx prisma migrate dev --name init
+   ```
+
+2. **Run with Docker Compose**
+   ```bash
+   docker-compose up --build
+   ```
+   The `migrate` container will automatically apply pending migrations to the database.
+
 ## 🚀 Deployment
 
 ### Deploy to Telegram Mini App
