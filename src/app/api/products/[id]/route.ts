@@ -66,8 +66,31 @@ export async function PUT(
       stock,
       lowStockThreshold,
       categoryId,
+      newCategory,
       imageUrl,
     } = body;
+
+    // Handle category creation if newCategory is provided
+    let finalCategoryId = categoryId;
+    if (newCategory?.trim()) {
+      // Check if category already exists
+      let category = await prisma.category.findFirst({
+        where: {
+          businessId,
+          name: newCategory.trim(),
+        },
+      });
+
+      if (!category) {
+        category = await prisma.category.create({
+          data: {
+            name: newCategory.trim(),
+            businessId,
+          },
+        });
+      }
+      finalCategoryId = category.id;
+    }
 
     const product = await prisma.product.update({
       where: { id },
@@ -79,7 +102,7 @@ export async function PUT(
         ...(lowStockThreshold !== undefined && {
           lowStockThreshold: parseInt(lowStockThreshold),
         }),
-        ...(categoryId !== undefined && { categoryId }),
+        ...((categoryId !== undefined || newCategory) && { categoryId: finalCategoryId || null }),
         ...(imageUrl !== undefined && { imageUrl }),
       },
       include: { category: true },

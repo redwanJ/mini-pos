@@ -8,18 +8,14 @@ import {
   Package,
   QrCode,
   ShoppingCart,
-  BarChart3,
-  Users,
   Settings,
 } from 'lucide-react';
 
 const navItems = [
   { href: '/dashboard', icon: LayoutDashboard, labelKey: 'dashboard' },
   { href: '/products', icon: Package, labelKey: 'products' },
-  { href: '/scanner', icon: QrCode, labelKey: 'scanner' },
   { href: '/pos', icon: ShoppingCart, labelKey: 'pos' },
-  { href: '/reports', icon: BarChart3, labelKey: 'reports' },
-  { href: '/staff', icon: Users, labelKey: 'staff' },
+  { href: '/scanner', icon: QrCode, labelKey: 'scanner' },
   { href: '/settings', icon: Settings, labelKey: 'settings' },
 ];
 

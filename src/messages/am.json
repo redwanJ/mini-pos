@@ -29,7 +29,8 @@
     "loginWithTelegram": "በቴሌግራም ይግቡ",
     "loggingIn": "በመግባት ላይ...",
     "loginFailed": "መግባት አልተሳካም። እባክዎ እንደገና ይሞክሩ።",
-    "unauthorized": "ያልተፈቀደ መዳረሻ"
+    "unauthorized": "ያልተፈቀደ መዳረሻ",
+    "loggedOut": "ወጥተዋል"
   },
   "onboarding": {
     "title": "ጀምር",
@@ -166,6 +167,8 @@
     "owner": "ባለቤት",
     "manager": "ሥራ አስኪያጅ",
     "staffRole": "ሰራተኛ",
+    "managerDesc": "ምርቶች መጨመር/ማስተካከል እና ሪፖርቶች ማየት ይችላል",
+    "staffDesc": "ምርቶች መጨመር ብቻ ይችላል",
     "permissions": "ፈቃዶች",
     "canAddProducts": "ምርቶች መጨመር ይችላል",
     "canEditProducts": "ምርቶች ማስተካከል ይችላል",
@@ -182,7 +185,9 @@
     "pendingRequests": "በመጠባበቅ ላይ ያሉ ጥያቄዎች",
     "approve": "ፍቀድ",
     "reject": "አትቀበል",
-    "noPendingRequests": "በመጠባበቅ ላይ ያሉ ጥያቄዎች የሉም"
+    "noPendingRequests": "በመጠባበቅ ላይ ያሉ ጥያቄዎች የሉም",
+    "shareViaTelegram": "በቴሌግራም ያጋሩ",
+    "telegramInviteMessage": "{businessName}ን በMini POS ይቀላቀሉ!"
   },
   "settings": {
     "title": "ቅንብሮች",
@@ -206,7 +211,12 @@
     "about": "ስለ",
     "version": "ስሪት",
     "logout": "ውጣ",
-    "logoutConfirm": "መውጣት እንደሚፈልጉ እርግጠኛ ነዎት?"
+    "logoutConfirm": "መውጣት እንደሚፈልጉ እርግጠኛ ነዎት?",
+    "reports": "ሪፖርቶች",
+    "staffManagement": "ሰራተኛ አስተዳደር",
+    "switchBusiness": "ንግድ ቀይር",
+    "createNewBusiness": "አዲስ ንግድ ፍጠር",
+    "current": "አሁኑ"
   },
   "currencies": {
     "ETB": "የኢትዮጵያ ብር (ETB)",
