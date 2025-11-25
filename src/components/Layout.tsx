@@ -1,4 +1,5 @@
-import { Outlet, NavLink } from 'react-router-dom';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
 import {
   LayoutDashboard,
@@ -22,7 +23,8 @@ const navItems = [
   { path: '/settings', icon: Settings, label: 'Settings' },
 ];
 
-export default function Layout() {
+export default function Layout({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
   const alerts = useStore((state) => state.alerts);
   const currentStaff = useStore((state) => state.currentStaff);
   const activeAlertsCount = alerts.filter((a) => !a.dismissed).length;
@@ -68,57 +70,53 @@ export default function Layout() {
 
         {/* Main Content */}
         <main className="p-4 pb-24">
-          <Outlet />
+          {children}
         </main>
 
         {/* Bottom Navigation */}
         <nav className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-gray-200 z-50">
           <div className="max-w-7xl mx-auto px-2 py-2">
             <div className="grid grid-cols-4 gap-1">
-              {navItems.slice(0, 4).map((item) => (
-                <NavLink
-                  key={item.path}
-                  to={item.path}
-                  className={({ isActive }) =>
-                    `flex flex-col items-center gap-1 py-2 px-3 rounded-lg transition-all ${
-                      isActive
+              {navItems.slice(0, 4).map((item) => {
+                const isActive = pathname === item.path;
+                return (
+                  <Link
+                    key={item.path}
+                    href={item.path}
+                    className={`flex flex-col items-center gap-1 py-2 px-3 rounded-lg transition-all ${isActive
                         ? 'bg-gradient-to-br from-purple-500 to-pink-500 text-white'
                         : 'text-gray-600 hover:bg-gray-100'
-                    }`
-                  }
-                >
-                  {({ isActive }) => (
-                    <>
-                      <item.icon className="w-5 h-5" />
-                      <span className="text-xs font-medium">{item.label}</span>
-                      {isActive && (
-                        <motion.div
-                          layoutId="activeTab"
-                          className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-500 to-pink-500"
-                        />
-                      )}
-                    </>
-                  )}
-                </NavLink>
-              ))}
+                      }`}
+                  >
+                    <item.icon className="w-5 h-5" />
+                    <span className="text-xs font-medium">{item.label}</span>
+                    {isActive && (
+                      <motion.div
+                        layoutId="activeTab"
+                        className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-500 to-pink-500"
+                      />
+                    )}
+                  </Link>
+                );
+              })}
             </div>
             <div className="grid grid-cols-3 gap-1 mt-1">
-              {navItems.slice(4).map((item) => (
-                <NavLink
-                  key={item.path}
-                  to={item.path}
-                  className={({ isActive }) =>
-                    `flex flex-col items-center gap-1 py-2 px-3 rounded-lg transition-all ${
-                      isActive
+              {navItems.slice(4).map((item) => {
+                const isActive = pathname === item.path;
+                return (
+                  <Link
+                    key={item.path}
+                    href={item.path}
+                    className={`flex flex-col items-center gap-1 py-2 px-3 rounded-lg transition-all ${isActive
                         ? 'bg-gradient-to-br from-purple-500 to-pink-500 text-white'
                         : 'text-gray-600 hover:bg-gray-100'
-                    }`
-                  }
-                >
-                  <item.icon className="w-5 h-5" />
-                  <span className="text-xs font-medium">{item.label}</span>
-                </NavLink>
-              ))}
+                      }`}
+                  >
+                    <item.icon className="w-5 h-5" />
+                    <span className="text-xs font-medium">{item.label}</span>
+                  </Link>
+                );
+              })}
             </div>
           </div>
         </nav>
