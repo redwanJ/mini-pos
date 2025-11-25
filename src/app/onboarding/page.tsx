@@ -17,6 +17,7 @@ import {
   Camera,
 } from 'lucide-react';
 import { Html5Qrcode } from 'html5-qrcode';
+import { fetchApi } from '@/lib/api';
 
 type OnboardingStep = 'choice' | 'create' | 'join-code' | 'scan-qr' | 'pending';
 
@@ -57,13 +58,10 @@ export default function OnboardingPage() {
 
   async function checkPendingRequest() {
     try {
-      const response = await fetch('/api/business/pending-request');
-      if (response.ok) {
-        const data = await response.json();
-        if (data.pendingRequest) {
-          setPendingBusiness(data.pendingRequest.businessName);
-          setStep('pending');
-        }
+      const data = await fetchApi<{ pendingRequest: { businessName: string } | null }>('/api/business/pending-request');
+      if (data.pendingRequest) {
+        setPendingBusiness(data.pendingRequest.businessName);
+        setStep('pending');
       }
     } catch {
       // Ignore errors
@@ -80,7 +78,7 @@ export default function OnboardingPage() {
     setError(null);
 
     try {
-      const response = await fetch('/api/business/create', {
+      await fetchApi('/api/business/create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -88,11 +86,6 @@ export default function OnboardingPage() {
           currency,
         }),
       });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || 'Failed to create business');
-      }
 
       router.push('/dashboard');
     } catch (err) {
@@ -112,17 +105,11 @@ export default function OnboardingPage() {
     setError(null);
 
     try {
-      const response = await fetch('/api/business/join', {
+      const data = await fetchApi<{ status: string; businessName: string }>('/api/business/join', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ inviteCode: inviteCode.trim() }),
       });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to join business');
-      }
 
       if (data.status === 'pending') {
         setPendingBusiness(data.businessName);
@@ -142,17 +129,11 @@ export default function OnboardingPage() {
     setError(null);
 
     try {
-      const response = await fetch('/api/business/join', {
+      const data = await fetchApi<{ status: string; businessName: string }>('/api/business/join', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ inviteCode: code }),
       });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to join business');
-      }
 
       if (data.status === 'pending') {
         setPendingBusiness(data.businessName);

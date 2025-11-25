@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Loader2 } from 'lucide-react';
+import { fetchApi } from '@/lib/api';
 
 declare global {
   interface Window {
@@ -62,7 +63,7 @@ export default function HomePage() {
             language_code: 'en',
           };
 
-          const response = await fetch('/api/auth/telegram', {
+          const data = await fetchApi<{ needsOnboarding: boolean }>('/api/auth/telegram', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -71,15 +72,12 @@ export default function HomePage() {
             }),
           });
 
-          if (response.ok) {
-            const data = await response.json();
-            if (data.needsOnboarding) {
-              router.push('/onboarding');
-            } else {
-              router.push('/dashboard');
-            }
-            return;
+          if (data.needsOnboarding) {
+            router.push('/onboarding');
+          } else {
+            router.push('/dashboard');
           }
+          return;
         }
 
         if (!initData) {
@@ -89,17 +87,11 @@ export default function HomePage() {
         }
 
         // Authenticate with the server
-        const response = await fetch('/api/auth/telegram', {
+        const data = await fetchApi<{ needsOnboarding: boolean }>('/api/auth/telegram', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ initData }),
         });
-
-        if (!response.ok) {
-          throw new Error('Authentication failed');
-        }
-
-        const data = await response.json();
 
         if (data.needsOnboarding) {
           router.push('/onboarding');

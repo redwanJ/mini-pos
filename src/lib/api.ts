@@ -1,7 +1,10 @@
 import { Product, Transaction, StaffMember, LowStockAlert, AppSettings } from '../types';
 
-async function fetchApi<T>(url: string, options?: RequestInit): Promise<T> {
-    const response = await fetch(url, options);
+export async function fetchApi<T>(url: string, options?: RequestInit): Promise<T> {
+    const response = await fetch(url, {
+        ...options,
+        credentials: 'include', // Ensure cookies are sent with the request
+    });
     if (!response.ok) {
         const error = await response.json().catch(() => ({ error: 'Unknown error' }));
         throw new Error(error.error || `Request failed with status ${response.status}`);
