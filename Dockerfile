@@ -53,15 +53,15 @@ COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
 USER nextjs
 
 # Expose port
-EXPOSE 3000
+EXPOSE 5173
 
 # Set hostname
 ENV HOSTNAME="0.0.0.0"
-ENV PORT=3000
+ENV PORT=5173
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:3000/api/health || exit 1
+  CMD wget --no-verbose --tries=1 --spider http://localhost:5173/api/health || exit 1
 
 # Start the application
 CMD ["node", "server.js"]

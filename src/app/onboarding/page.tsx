@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -137,7 +137,38 @@ export default function OnboardingPage() {
     }
   }
 
-  async function startScanner() {
+  const handleJoinWithQR = useCallback(async (code: string) => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch('/api/business/join', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ inviteCode: code }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to join business');
+      }
+
+      if (data.status === 'pending') {
+        setPendingBusiness(data.businessName);
+        setStep('pending');
+      } else {
+        router.push('/dashboard');
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to join business');
+      setStep('choice');
+    } finally {
+      setLoading(false);
+    }
+  }, [router]);
+
+  const startScanner = useCallback(async () => {
     if (!scannerContainerRef.current) return;
 
     setScanning(true);
@@ -174,9 +205,9 @@ export default function OnboardingPage() {
       setScanning(false);
       setError('Failed to start camera');
     }
-  }
+  }, [handleJoinWithQR]);
 
-  async function stopScanner() {
+  const stopScanner = useCallback(async () => {
     if (scannerRef.current) {
       try {
         await scannerRef.current.stop();
@@ -186,45 +217,16 @@ export default function OnboardingPage() {
       scannerRef.current = null;
     }
     setScanning(false);
-  }
+  }, []);
 
-  async function handleJoinWithQR(code: string) {
-    setLoading(true);
-    setError(null);
 
-    try {
-      const response = await fetch('/api/business/join', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ inviteCode: code }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to join business');
-      }
-
-      if (data.status === 'pending') {
-        setPendingBusiness(data.businessName);
-        setStep('pending');
-      } else {
-        router.push('/dashboard');
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to join business');
-      setStep('choice');
-    } finally {
-      setLoading(false);
-    }
-  }
 
   useEffect(() => {
     // Cleanup scanner on unmount
     return () => {
       stopScanner();
     };
-  }, []);
+  }, [stopScanner]);
 
   useEffect(() => {
     // Start scanner when step changes to scan-qr
@@ -233,7 +235,7 @@ export default function OnboardingPage() {
     } else {
       stopScanner();
     }
-  }, [step]);
+  }, [step, startScanner, stopScanner]);
 
   const renderChoice = () => (
     <motion.div

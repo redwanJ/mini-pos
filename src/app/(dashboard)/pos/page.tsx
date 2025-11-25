@@ -100,45 +100,22 @@ export default function POSPage() {
     return () => clearTimeout(debounce);
   }, [searchProducts]);
 
-  async function startScanner() {
-    try {
-      const scanner = new Html5Qrcode('pos-scanner');
-      scannerRef.current = scanner;
-
-      await scanner.start(
-        { facingMode: 'environment' },
-        { fps: 10, qrbox: { width: 250, height: 250 } },
-        handleScan,
-        () => {}
-      );
-    } catch (err) {
-      console.error('Failed to start scanner:', err);
-    }
-  }
-
-  async function stopScanner() {
-    if (scannerRef.current) {
-      try {
-        await scannerRef.current.stop();
-      } catch {
-        // Ignore
+  const addToCart = useCallback((product: Product) => {
+    setCart((prev) => {
+      const existing = prev.find((item) => item.id === product.id);
+      if (existing) {
+        if (existing.quantity >= product.stock) return prev;
+        return prev.map((item) =>
+          item.id === product.id
+            ? { ...item, quantity: item.quantity + 1 }
+            : item
+        );
       }
-      scannerRef.current = null;
-    }
-  }
+      return [...prev, { ...product, quantity: 1 }];
+    });
+  }, []);
 
-  useEffect(() => {
-    if (showScanner) {
-      startScanner();
-    } else {
-      stopScanner();
-    }
-    return () => {
-      stopScanner();
-    };
-  }, [showScanner]);
-
-  async function handleScan(decodedText: string) {
+  const handleScan = useCallback(async (decodedText: string) => {
     let productId = parseQRData(decodedText);
     if (!productId) productId = decodedText;
 
@@ -154,22 +131,45 @@ export default function POSPage() {
     } catch {
       // Ignore
     }
-  }
+  }, [addToCart]);
 
-  function addToCart(product: Product) {
-    setCart((prev) => {
-      const existing = prev.find((item) => item.id === product.id);
-      if (existing) {
-        if (existing.quantity >= product.stock) return prev;
-        return prev.map((item) =>
-          item.id === product.id
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        );
+  const startScanner = useCallback(async () => {
+    try {
+      const scanner = new Html5Qrcode('pos-scanner');
+      scannerRef.current = scanner;
+
+      await scanner.start(
+        { facingMode: 'environment' },
+        { fps: 10, qrbox: { width: 250, height: 250 } },
+        handleScan,
+        () => { }
+      );
+    } catch (err) {
+      console.error('Failed to start scanner:', err);
+    }
+  }, [handleScan]);
+
+  const stopScanner = useCallback(async () => {
+    if (scannerRef.current) {
+      try {
+        await scannerRef.current.stop();
+      } catch {
+        // Ignore
       }
-      return [...prev, { ...product, quantity: 1 }];
-    });
-  }
+      scannerRef.current = null;
+    }
+  }, []);
+
+  useEffect(() => {
+    if (showScanner) {
+      startScanner();
+    } else {
+      stopScanner();
+    }
+    return () => {
+      stopScanner();
+    };
+  }, [showScanner, startScanner, stopScanner]);
 
   function updateQuantity(productId: string, delta: number) {
     setCart((prev) =>
@@ -471,11 +471,10 @@ export default function POSPage() {
                         <button
                           key={method.id}
                           onClick={() => setPaymentMethod(method.id)}
-                          className={`p-3 rounded-lg flex flex-col items-center gap-1 transition-colors ${
-                            paymentMethod === method.id
-                              ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 ring-2 ring-blue-500'
-                              : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
-                          }`}
+                          className={`p-3 rounded-lg flex flex-col items-center gap-1 transition-colors ${paymentMethod === method.id
+                            ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 ring-2 ring-blue-500'
+                            : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
+                            }`}
                         >
                           <Icon className="w-5 h-5" />
                           <span className="text-xs">{t(method.labelKey)}</span>
