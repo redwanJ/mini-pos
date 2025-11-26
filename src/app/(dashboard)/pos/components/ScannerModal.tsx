@@ -30,11 +30,22 @@ export function ScannerModal({
 }: ScannerModalProps) {
   const t = useTranslations('pos');
   const scannerRef = useRef<Html5Qrcode | null>(null);
+  const isProcessingRef = useRef(false);
+  const lastScannedRef = useRef<string | null>(null);
 
   const handleScan = useCallback(
     async (decodedText: string) => {
+      // Prevent processing if already handling a scan
+      if (isProcessingRef.current) return;
+
       let productId = parseQRData(decodedText);
       if (!productId) productId = decodedText;
+
+      // Prevent rapid re-scanning of the same code
+      if (lastScannedRef.current === productId) return;
+
+      isProcessingRef.current = true;
+      lastScannedRef.current = productId;
 
       try {
         const response = await fetch(
@@ -44,11 +55,14 @@ export function ScannerModal({
           const data = await response.json();
           onProductScanned(data.product);
 
-          // Brief pause for visual feedback
+          // Pause scanner for visual feedback and to prevent duplicate scans
           if (scannerRef.current) {
             try {
               await scannerRef.current.pause(true);
               setTimeout(async () => {
+                // Reset last scanned so the same item can be scanned again
+                lastScannedRef.current = null;
+                isProcessingRef.current = false;
                 if (scannerRef.current) {
                   try {
                     await scannerRef.current.resume();
@@ -56,14 +70,18 @@ export function ScannerModal({
                     // Ignore
                   }
                 }
-              }, 500);
+              }, 1000);
             } catch {
-              // Ignore
+              isProcessingRef.current = false;
             }
+          } else {
+            isProcessingRef.current = false;
           }
+        } else {
+          isProcessingRef.current = false;
         }
       } catch {
-        // Ignore
+        isProcessingRef.current = false;
       }
     },
     [onProductScanned]
@@ -94,6 +112,9 @@ export function ScannerModal({
       }
       scannerRef.current = null;
     }
+    // Reset scan state
+    isProcessingRef.current = false;
+    lastScannedRef.current = null;
   }, []);
 
   useEffect(() => {
