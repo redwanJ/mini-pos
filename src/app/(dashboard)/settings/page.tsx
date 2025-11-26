@@ -525,9 +525,9 @@ export default function SettingsPage() {
               animate={{ y: 0 }}
               exit={{ y: '100%' }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-white dark:bg-gray-800 w-full sm:max-w-md sm:rounded-xl rounded-t-xl p-6"
+              className="bg-white dark:bg-gray-800 w-full sm:max-w-md sm:rounded-xl rounded-t-xl max-h-[90vh] flex flex-col"
             >
-              <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center justify-between p-6 pb-4 border-b border-gray-200 dark:border-gray-700">
                 <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
                   {t('switchBusiness')}
                 </h2>
@@ -539,7 +539,7 @@ export default function SettingsPage() {
                 </button>
               </div>
 
-              <div className="space-y-2">
+              <div className="flex-1 overflow-y-auto p-6 pt-4 space-y-2">
                 {businesses.map((business) => {
                   const RoleIcon = getRoleIcon(business.role);
                   return (
@@ -571,13 +571,13 @@ export default function SettingsPage() {
                     </button>
                   );
                 })}
-              </div>
 
-              {switching && (
-                <div className="flex justify-center mt-4">
-                  <Loader2 className="w-6 h-6 animate-spin text-purple-600" />
-                </div>
-              )}
+                {switching && (
+                  <div className="flex justify-center mt-4">
+                    <Loader2 className="w-6 h-6 animate-spin text-purple-600" />
+                  </div>
+                )}
+              </div>
             </motion.div>
           </motion.div>
         )}
@@ -598,9 +598,9 @@ export default function SettingsPage() {
               animate={{ y: 0 }}
               exit={{ y: '100%' }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-white dark:bg-gray-800 w-full sm:max-w-md sm:rounded-xl rounded-t-xl p-6"
+              className="bg-white dark:bg-gray-800 w-full sm:max-w-md sm:rounded-xl rounded-t-xl max-h-[90vh] flex flex-col"
             >
-              <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center justify-between p-6 pb-4 border-b border-gray-200 dark:border-gray-700">
                 <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
                   {t('createNewBusiness')}
                 </h2>
@@ -612,7 +612,7 @@ export default function SettingsPage() {
                 </button>
               </div>
 
-              <div className="space-y-4">
+              <div className="flex-1 overflow-y-auto p-6 pt-4 space-y-4">
                 <div>
                   <label className="label">{tOnboarding('businessName')}</label>
                   <input
@@ -638,7 +638,9 @@ export default function SettingsPage() {
                     ))}
                   </select>
                 </div>
+              </div>
 
+              <div className="p-6 pt-4 border-t border-gray-200 dark:border-gray-700 safe-bottom">
                 <button
                   onClick={handleCreateBusiness}
                   disabled={creating || !newBusinessName.trim()}

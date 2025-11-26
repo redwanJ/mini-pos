@@ -127,8 +127,8 @@ export default function POSPage() {
       );
       if (response.ok) {
         const data = await response.json();
-        // Pass false to not increment quantity if product already in cart
-        addToCart(data.product, false);
+        // Pass true to increment quantity if product already in cart
+        addToCart(data.product, true);
         setShowScanner(false);
       }
     } catch {
@@ -446,11 +446,19 @@ export default function POSPage() {
               animate={{ y: 0 }}
               exit={{ y: '100%' }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-white dark:bg-gray-800 w-full sm:max-w-md sm:rounded-xl rounded-t-xl p-6"
+              className="bg-white dark:bg-gray-800 w-full sm:max-w-md sm:rounded-xl rounded-t-xl max-h-[90vh] flex flex-col"
             >
-              <h2 className="text-lg font-semibold mb-4">{t('checkout')}</h2>
+              <div className="flex items-center justify-between p-6 pb-4 border-b border-gray-200 dark:border-gray-700">
+                <h2 className="text-lg font-semibold">{t('checkout')}</h2>
+                <button
+                  onClick={() => setShowCheckout(false)}
+                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
 
-              <div className="space-y-4">
+              <div className="flex-1 overflow-y-auto p-6 pt-4 space-y-4">
                 <div>
                   <label className="label">{t('discountPercent')}</label>
                   <input
@@ -486,24 +494,24 @@ export default function POSPage() {
                     })}
                   </div>
                 </div>
+              </div>
 
-                <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
-                  <div className="flex justify-between text-lg font-bold mb-4">
-                    <span>{t('total')}</span>
-                    <span>{formatCurrency(total, currency)}</span>
-                  </div>
-                  <button
-                    onClick={handleCheckout}
-                    disabled={loading}
-                    className="w-full btn btn-primary py-3"
-                  >
-                    {loading ? (
-                      <Loader2 className="w-5 h-5 animate-spin" />
-                    ) : (
-                      t('completeSale')
-                    )}
-                  </button>
+              <div className="p-6 pt-4 border-t border-gray-200 dark:border-gray-700 safe-bottom">
+                <div className="flex justify-between text-lg font-bold mb-4">
+                  <span>{t('total')}</span>
+                  <span>{formatCurrency(total, currency)}</span>
                 </div>
+                <button
+                  onClick={handleCheckout}
+                  disabled={loading}
+                  className="w-full btn btn-primary py-3"
+                >
+                  {loading ? (
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                  ) : (
+                    t('completeSale')
+                  )}
+                </button>
               </div>
             </motion.div>
           </motion.div>
