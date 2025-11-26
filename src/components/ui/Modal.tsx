@@ -95,13 +95,13 @@ export function Modal({
             </div>
 
             {/* Content */}
-            <div className="flex-1 overflow-y-auto p-4 sm:p-6 pt-3 sm:pt-4 min-h-0">
+            <div className="flex-1 overflow-y-auto p-4 sm:p-6 pt-3 sm:pt-4 min-h-0 mb-16">
               {children}
             </div>
 
             {/* Footer */}
             {footer && (
-              <div className="p-4 sm:p-6 pt-3 sm:pt-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 flex-shrink-0 safe-bottom">
+              <div className="mb-16 p-4 sm:p-6 pt-3 sm:pt-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 flex-shrink-0 safe-bottom">
                 {footer}
               </div>
             )}
