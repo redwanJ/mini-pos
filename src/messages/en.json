@@ -29,7 +29,8 @@
     "loginWithTelegram": "Login with Telegram",
     "loggingIn": "Logging in...",
     "loginFailed": "Login failed. Please try again.",
-    "unauthorized": "Unauthorized access"
+    "unauthorized": "Unauthorized access",
+    "loggedOut": "You have been logged out"
   },
   "onboarding": {
     "title": "Get Started",
@@ -166,6 +167,8 @@
     "owner": "Owner",
     "manager": "Manager",
     "staffRole": "Staff",
+    "managerDesc": "Can add/edit products and view reports",
+    "staffDesc": "Can add products only",
     "permissions": "Permissions",
     "canAddProducts": "Can add products",
     "canEditProducts": "Can edit products",
@@ -182,7 +185,9 @@
     "pendingRequests": "Pending Requests",
     "approve": "Approve",
     "reject": "Reject",
-    "noPendingRequests": "No pending requests"
+    "noPendingRequests": "No pending requests",
+    "shareViaTelegram": "Share via Telegram",
+    "telegramInviteMessage": "Join {businessName} on Mini POS!"
   },
   "settings": {
     "title": "Settings",
@@ -206,7 +211,12 @@
     "about": "About",
     "version": "Version",
     "logout": "Logout",
-    "logoutConfirm": "Are you sure you want to logout?"
+    "logoutConfirm": "Are you sure you want to logout?",
+    "reports": "Reports",
+    "staffManagement": "Staff Management",
+    "switchBusiness": "Switch Business",
+    "createNewBusiness": "Create New Business",
+    "current": "Current"
   },
   "currencies": {
     "ETB": "Ethiopian Birr (ETB)",

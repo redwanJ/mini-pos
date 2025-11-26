@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -13,6 +13,8 @@ import {
   Edit2,
   Trash2,
   X,
+  Download,
+  ChevronDown,
 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { PageHeader } from '@/components/PageHeader';
@@ -30,17 +32,24 @@ interface Product {
   category?: { id: string; name: string };
 }
 
+interface Category {
+  id: string;
+  name: string;
+}
+
 export default function ProductsPage() {
   const t = useTranslations('products');
   const tCommon = useTranslations('common');
 
   const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [showQR, setShowQR] = useState<Product | null>(null);
   const [currency, setCurrency] = useState('ETB');
+  const qrRef = useRef<HTMLDivElement>(null);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -49,7 +58,10 @@ export default function ProductsPage() {
     salePrice: '',
     stock: '0',
     lowStockThreshold: '5',
+    categoryId: '',
+    newCategory: '',
   });
+  const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
@@ -72,7 +84,7 @@ export default function ProductsPage() {
   }, [fetchProducts]);
 
   useEffect(() => {
-    // Fetch business currency
+    // Fetch business currency and categories
     async function fetchBusiness() {
       try {
         const response = await fetch('/api/business');
@@ -84,7 +96,19 @@ export default function ProductsPage() {
         // Ignore
       }
     }
+    async function fetchCategories() {
+      try {
+        const response = await fetch('/api/categories');
+        if (response.ok) {
+          const data = await response.json();
+          setCategories(data.categories || []);
+        }
+      } catch {
+        // Ignore
+      }
+    }
     fetchBusiness();
+    fetchCategories();
   }, []);
 
   const openAddModal = () => {
@@ -95,7 +119,10 @@ export default function ProductsPage() {
       salePrice: '',
       stock: '0',
       lowStockThreshold: '5',
+      categoryId: '',
+      newCategory: '',
     });
+    setShowCategoryDropdown(false);
     setFormError(null);
     setShowModal(true);
   };
@@ -108,7 +135,10 @@ export default function ProductsPage() {
       salePrice: product.salePrice.toString(),
       stock: product.stock.toString(),
       lowStockThreshold: product.lowStockThreshold.toString(),
+      categoryId: product.category?.id || '',
+      newCategory: '',
     });
+    setShowCategoryDropdown(false);
     setFormError(null);
     setShowModal(true);
   };
@@ -137,6 +167,8 @@ export default function ProductsPage() {
           salePrice: parseFloat(formData.salePrice) || 0,
           stock: parseInt(formData.stock) || 0,
           lowStockThreshold: parseInt(formData.lowStockThreshold) || 5,
+          categoryId: formData.categoryId || null,
+          newCategory: formData.newCategory.trim() || null,
         }),
       });
 
@@ -147,11 +179,54 @@ export default function ProductsPage() {
 
       setShowModal(false);
       fetchProducts();
+      // Refresh categories in case a new one was created
+      const catResponse = await fetch('/api/categories');
+      if (catResponse.ok) {
+        const catData = await catResponse.json();
+        setCategories(catData.categories || []);
+      }
     } catch (error) {
       setFormError(error instanceof Error ? error.message : 'Failed to save');
     } finally {
       setSaving(false);
     }
+  };
+
+  const downloadQRCode = () => {
+    if (!showQR || !qrRef.current) return;
+
+    const svg = qrRef.current.querySelector('svg');
+    if (!svg) return;
+
+    const svgData = new XMLSerializer().serializeToString(svg);
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    const img = new Image();
+
+    img.onload = () => {
+      canvas.width = 300;
+      canvas.height = 350;
+      if (ctx) {
+        ctx.fillStyle = 'white';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 50, 20, 200, 200);
+        ctx.fillStyle = 'black';
+        ctx.font = 'bold 16px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(showQR.name, canvas.width / 2, 250);
+        ctx.font = '12px monospace';
+        ctx.fillText(showQR.qrCode, canvas.width / 2, 275);
+        ctx.font = '14px sans-serif';
+        ctx.fillText(formatCurrency(showQR.salePrice, currency), canvas.width / 2, 300);
+      }
+
+      const link = document.createElement('a');
+      link.download = `${showQR.name.replace(/[^a-z0-9]/gi, '_')}_qr.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    };
+
+    img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
   };
 
   const handleDelete = async (product: Product) => {
@@ -289,9 +364,9 @@ export default function ProductsPage() {
               animate={{ y: 0 }}
               exit={{ y: '100%' }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-white dark:bg-gray-800 w-full sm:max-w-md sm:rounded-xl rounded-t-xl p-6 max-h-[90vh] overflow-y-auto"
+              className="bg-white dark:bg-gray-800 w-full sm:max-w-md sm:rounded-xl rounded-t-xl max-h-[85vh] flex flex-col"
             >
-              <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center justify-between p-6 pb-4 border-b border-gray-200 dark:border-gray-700">
                 <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
                   {editingProduct ? t('editProduct') : t('addProduct')}
                 </h2>
@@ -303,7 +378,7 @@ export default function ProductsPage() {
                 </button>
               </div>
 
-              <div className="space-y-4">
+              <div className="flex-1 overflow-y-auto p-6 pt-4 space-y-4">
                 <div>
                   <label className="label">{t('name')}</label>
                   <input
@@ -372,13 +447,74 @@ export default function ProductsPage() {
                   </div>
                 </div>
 
+                {/* Category dropdown */}
+                <div>
+                  <label className="label">{t('category')}</label>
+                  <div className="relative">
+                    <button
+                      type="button"
+                      onClick={() => setShowCategoryDropdown(!showCategoryDropdown)}
+                      className="input flex items-center justify-between text-left"
+                    >
+                      <span className={formData.categoryId || formData.newCategory ? 'text-gray-900 dark:text-white' : 'text-gray-400'}>
+                        {formData.newCategory
+                          ? formData.newCategory
+                          : formData.categoryId
+                            ? categories.find(c => c.id === formData.categoryId)?.name
+                            : t('categoryPlaceholder')}
+                      </span>
+                      <ChevronDown className="w-4 h-4 text-gray-400" />
+                    </button>
+
+                    {showCategoryDropdown && (
+                      <div className="absolute z-10 mt-1 w-full bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setFormData({ ...formData, categoryId: '', newCategory: '' });
+                            setShowCategoryDropdown(false);
+                          }}
+                          className="w-full px-4 py-2 text-left text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-600"
+                        >
+                          {t('categoryPlaceholder')}
+                        </button>
+                        {categories.map((cat) => (
+                          <button
+                            key={cat.id}
+                            type="button"
+                            onClick={() => {
+                              setFormData({ ...formData, categoryId: cat.id, newCategory: '' });
+                              setShowCategoryDropdown(false);
+                            }}
+                            className="w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-600"
+                          >
+                            {cat.name}
+                          </button>
+                        ))}
+                        <div className="border-t border-gray-200 dark:border-gray-600 p-2">
+                          <input
+                            type="text"
+                            placeholder={tCommon('add') + ' ' + t('category').toLowerCase() + '...'}
+                            value={formData.newCategory}
+                            onChange={(e) => setFormData({ ...formData, newCategory: e.target.value, categoryId: '' })}
+                            className="input text-sm"
+                            onClick={(e) => e.stopPropagation()}
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
                 {formError && (
                   <div className="flex items-center gap-2 text-red-500 text-sm">
                     <AlertCircle className="w-4 h-4" />
                     {formError}
                   </div>
                 )}
+              </div>
 
+              <div className="p-6 pt-4 border-t border-gray-200 dark:border-gray-700 safe-bottom">
                 <button
                   onClick={handleSave}
                   disabled={saving}
@@ -414,12 +550,12 @@ export default function ProductsPage() {
               animate={{ scale: 1 }}
               exit={{ scale: 0.9 }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-white dark:bg-gray-800 rounded-xl p-6 text-center"
+              className="bg-white dark:bg-gray-800 rounded-xl p-6 text-center max-w-xs mx-4"
             >
               <h3 className="font-semibold text-gray-900 dark:text-white mb-4">
                 {showQR.name}
               </h3>
-              <div className="bg-white p-4 rounded-lg inline-block">
+              <div ref={qrRef} className="bg-white p-4 rounded-lg inline-block">
                 <QRCodeSVG
                   value={generateQRData(showQR.id)}
                   size={200}
@@ -427,12 +563,24 @@ export default function ProductsPage() {
                 />
               </div>
               <p className="text-xs text-gray-500 mt-4 font-mono">{showQR.qrCode}</p>
-              <button
-                onClick={() => setShowQR(null)}
-                className="mt-4 btn btn-secondary"
-              >
-                {tCommon('cancel')}
-              </button>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                {formatCurrency(showQR.salePrice, currency)}
+              </p>
+              <div className="flex gap-2 mt-4">
+                <button
+                  onClick={downloadQRCode}
+                  className="flex-1 btn btn-primary"
+                >
+                  <Download className="w-4 h-4 mr-2" />
+                  {t('printQR')}
+                </button>
+                <button
+                  onClick={() => setShowQR(null)}
+                  className="flex-1 btn btn-secondary"
+                >
+                  {tCommon('cancel')}
+                </button>
+              </div>
             </motion.div>
           </motion.div>
         )}

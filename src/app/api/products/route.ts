@@ -68,6 +68,7 @@ export async function POST(request: NextRequest) {
       stock = 0,
       lowStockThreshold = 5,
       categoryId,
+      newCategory,
       imageUrl,
     } = body;
 
@@ -79,6 +80,28 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Prices are required' }, { status: 400 });
     }
 
+    // Handle category creation if newCategory is provided
+    let finalCategoryId = categoryId;
+    if (newCategory?.trim()) {
+      // Check if category already exists
+      let category = await prisma.category.findFirst({
+        where: {
+          businessId,
+          name: newCategory.trim(),
+        },
+      });
+
+      if (!category) {
+        category = await prisma.category.create({
+          data: {
+            name: newCategory.trim(),
+            businessId,
+          },
+        });
+      }
+      finalCategoryId = category.id;
+    }
+
     const product = await prisma.product.create({
       data: {
         name: name.trim(),
@@ -86,7 +109,7 @@ export async function POST(request: NextRequest) {
         salePrice: parseFloat(salePrice),
         stock: parseInt(stock),
         lowStockThreshold: parseInt(lowStockThreshold),
-        categoryId,
+        categoryId: finalCategoryId || null,
         imageUrl,
         businessId,
       },
