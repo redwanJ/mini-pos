@@ -92,3 +92,20 @@ export function isTelegramInitDataExpired(authDate: number, maxAgeSeconds = 8640
   const now = Math.floor(Date.now() / 1000);
   return now - authDate > maxAgeSeconds;
 }
+export async function sendMessage(chatId: number | string, text: string, botToken: string) {
+  try {
+    const response = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chat_id: chatId,
+        text,
+        parse_mode: 'HTML',
+      }),
+    });
+    return response.ok;
+  } catch (error) {
+    console.error('Failed to send Telegram message:', error);
+    return false;
+  }
+}

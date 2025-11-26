@@ -7,6 +7,7 @@ import { Link2, Check, Copy, Send, Loader2, Clock, UserPlus } from 'lucide-react
 
 interface InviteLinkCardProps {
   businessName: string;
+  className?: string;
 }
 
 interface InviteData {
@@ -17,7 +18,7 @@ interface InviteData {
   businessName: string;
 }
 
-export function InviteLinkCard({ businessName }: InviteLinkCardProps) {
+export function InviteLinkCard({ businessName, className }: InviteLinkCardProps) {
   const t = useTranslations('staff');
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -71,7 +72,7 @@ export function InviteLinkCard({ businessName }: InviteLinkCardProps) {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="card p-4"
+      className={className || "card p-4"}
     >
       <div className="flex items-center gap-3 mb-4">
         <UserPlus className="w-5 h-5 text-blue-600" />
@@ -93,21 +94,19 @@ export function InviteLinkCard({ businessName }: InviteLinkCardProps) {
             <div className="flex gap-2">
               <button
                 onClick={() => setSelectedRole('STAFF')}
-                className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
-                  selectedRole === 'STAFF'
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
-                }`}
+                className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${selectedRole === 'STAFF'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
+                  }`}
               >
                 {t('staffRole')}
               </button>
               <button
                 onClick={() => setSelectedRole('MANAGER')}
-                className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
-                  selectedRole === 'MANAGER'
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
-                }`}
+                className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${selectedRole === 'MANAGER'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
+                  }`}
               >
                 {t('manager')}
               </button>

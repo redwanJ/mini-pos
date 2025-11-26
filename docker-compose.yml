@@ -29,7 +29,9 @@ services:
     restart: unless-stopped
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER:-minipos}:${POSTGRES_PASSWORD:-minipos_secret}@postgres:5432/${POSTGRES_DB:-minipos}
-      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-7420866310:AAGzCNzBxAJYRe3SOPPPp3I-UAoXSuUzJk0}
+      TELEGRAM_BOT_USERNAME: ${TELEGRAM_BOT_USERNAME:-minipos}
+      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:5173}
       NODE_ENV: production
     ports:
       - "5173:5173"

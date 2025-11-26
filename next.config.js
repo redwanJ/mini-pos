@@ -7,6 +7,7 @@ const nextConfig = {
   output: 'standalone',
   experimental: {
     serverComponentsExternalPackages: ['@grpc/grpc-js', '@grpc/proto-loader'],
+    instrumentationHook: true,
   },
   images: {
     remotePatterns: [
