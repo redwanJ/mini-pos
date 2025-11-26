@@ -129,7 +129,24 @@ export default function POSPage() {
         const data = await response.json();
         // Pass true to increment quantity if product already in cart
         addToCart(data.product, true);
-        setShowScanner(false);
+        // Keep scanner open for continuous scanning - user can close manually
+        // Give visual feedback by briefly pausing
+        if (scannerRef.current) {
+          try {
+            await scannerRef.current.pause(true);
+            setTimeout(async () => {
+              if (scannerRef.current) {
+                try {
+                  await scannerRef.current.resume();
+                } catch {
+                  // Ignore resume errors
+                }
+              }
+            }, 500);
+          } catch {
+            // Ignore pause errors
+          }
+        }
       }
     } catch {
       // Ignore
@@ -413,10 +430,14 @@ export default function POSPage() {
             exit={{ opacity: 0 }}
             className="fixed inset-0 bg-black/90 z-50 flex flex-col"
           >
-            <div className="p-4 flex justify-end">
+            <div className="p-4 flex items-center justify-between">
+              <div className="flex items-center gap-2 text-white">
+                <ShoppingCart className="w-5 h-5" />
+                <span className="font-medium">{itemCount} {t('items') || 'items'}</span>
+              </div>
               <button
                 onClick={() => setShowScanner(false)}
-                className="text-white p-2"
+                className="text-white p-2 bg-white/10 rounded-lg hover:bg-white/20"
               >
                 <X className="w-6 h-6" />
               </button>
@@ -426,6 +447,9 @@ export default function POSPage() {
                 id="pos-scanner"
                 className="w-full max-w-md aspect-square rounded-xl overflow-hidden"
               />
+            </div>
+            <div className="p-4 text-center text-white/70 text-sm">
+              {t('scanProducts') || 'Scan products to add to cart'}
             </div>
           </motion.div>
         )}
@@ -446,9 +470,9 @@ export default function POSPage() {
               animate={{ y: 0 }}
               exit={{ y: '100%' }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-white dark:bg-gray-800 w-full sm:max-w-md sm:rounded-xl rounded-t-xl max-h-[90vh] flex flex-col"
+              className="bg-white dark:bg-gray-800 w-full sm:max-w-md sm:rounded-xl rounded-t-xl flex flex-col modal-container"
             >
-              <div className="flex items-center justify-between p-6 pb-4 border-b border-gray-200 dark:border-gray-700">
+              <div className="flex items-center justify-between p-4 sm:p-6 pb-3 sm:pb-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
                 <h2 className="text-lg font-semibold">{t('checkout')}</h2>
                 <button
                   onClick={() => setShowCheckout(false)}
@@ -458,7 +482,7 @@ export default function POSPage() {
                 </button>
               </div>
 
-              <div className="flex-1 overflow-y-auto p-6 pt-4 space-y-4">
+              <div className="flex-1 overflow-y-auto p-4 sm:p-6 pt-3 sm:pt-4 space-y-4 modal-scroll">
                 <div>
                   <label className="label">{t('discountPercent')}</label>
                   <input
@@ -494,9 +518,12 @@ export default function POSPage() {
                     })}
                   </div>
                 </div>
+
+                {/* Extra padding at bottom */}
+                <div className="h-4" />
               </div>
 
-              <div className="p-6 pt-4 border-t border-gray-200 dark:border-gray-700 safe-bottom">
+              <div className="p-4 sm:p-6 pt-3 sm:pt-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 flex-shrink-0 safe-bottom">
                 <div className="flex justify-between text-lg font-bold mb-4">
                   <span>{t('total')}</span>
                   <span>{formatCurrency(total, currency)}</span>
@@ -504,7 +531,7 @@ export default function POSPage() {
                 <button
                   onClick={handleCheckout}
                   disabled={loading}
-                  className="w-full btn btn-primary py-3"
+                  className="w-full btn btn-primary py-3 text-base"
                 >
                   {loading ? (
                     <Loader2 className="w-5 h-5 animate-spin" />

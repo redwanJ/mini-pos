@@ -445,9 +445,9 @@ export default function StaffPage() {
               animate={{ y: 0 }}
               exit={{ y: '100%' }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-white dark:bg-gray-800 w-full sm:max-w-md sm:rounded-xl rounded-t-xl max-h-[90vh] flex flex-col"
+              className="bg-white dark:bg-gray-800 w-full sm:max-w-md sm:rounded-xl rounded-t-xl flex flex-col modal-container"
             >
-              <div className="flex items-center justify-between p-6 pb-4 border-b border-gray-200 dark:border-gray-700">
+              <div className="flex items-center justify-between p-4 sm:p-6 pb-3 sm:pb-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
                 <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
                   {t('editStaff')}
                 </h2>
@@ -459,7 +459,7 @@ export default function StaffPage() {
                 </button>
               </div>
 
-              <div className="flex-1 overflow-y-auto p-6 pt-4">
+              <div className="flex-1 overflow-y-auto p-4 sm:p-6 pt-3 sm:pt-4 modal-scroll">
                 <div className="mb-4">
                   <p className="font-medium text-gray-900 dark:text-white mb-1">
                     {editingMember.name}
@@ -514,6 +514,9 @@ export default function StaffPage() {
                     <Loader2 className="w-6 h-6 animate-spin text-blue-600" />
                   </div>
                 )}
+
+                {/* Extra padding at bottom */}
+                <div className="h-4" />
               </div>
             </motion.div>
           </motion.div>

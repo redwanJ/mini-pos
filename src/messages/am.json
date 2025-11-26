@@ -29,6 +29,7 @@
     "loginWithTelegram": "በቴሌግራም ይግቡ",
     "loggingIn": "በመግባት ላይ...",
     "loginFailed": "መግባት አልተሳካም። እባክዎ እንደገና ይሞክሩ።",
+    "telegramWebNotSupported": "እባክዎ ይህን መተግበሪያ በቴሌግራም ሞባይል መተግበሪያ ውስጥ ይክፈቱ",
     "unauthorized": "ያልተፈቀደ መዳረሻ",
     "loggedOut": "ወጥተዋል"
   },
@@ -136,7 +137,9 @@
     "saleComplete": "ሽያጭ ተጠናቋል!",
     "printReceipt": "ደረሰኝ አትም",
     "newSale": "አዲስ ሽያጭ",
-    "itemsInCart": "በጋሪ ውስጥ {count} ዕቃዎች"
+    "itemsInCart": "በጋሪ ውስጥ {count} ዕቃዎች",
+    "items": "ዕቃዎች",
+    "scanProducts": "ወደ ጋሪ ለመጨመር ምርቶችን ይቃኙ"
   },
   "reports": {
     "title": "ሪፖርቶች",

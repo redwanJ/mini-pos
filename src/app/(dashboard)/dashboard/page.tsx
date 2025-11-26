@@ -9,45 +9,41 @@ async function getDashboardData(businessId: string) {
   const tomorrow = new Date(today);
   tomorrow.setDate(tomorrow.getDate() + 1);
 
-  const [
-    productCount,
-    todayTransactions,
-    lowStockProducts,
-    recentTransactions,
-    business,
-  ] = await Promise.all([
-    prisma.product.count({ where: { businessId } }),
-    prisma.transaction.findMany({
-      where: {
-        businessId,
-        createdAt: {
-          gte: today,
-          lt: tomorrow,
-        },
+  const productCount = await prisma.product.count({ where: { businessId } });
+
+  const todayTransactions = await prisma.transaction.findMany({
+    where: {
+      businessId,
+      createdAt: {
+        gte: today,
+        lt: tomorrow,
       },
-    }),
-    prisma.product.findMany({
-      where: {
-        businessId,
-        stock: {
-          lte: prisma.product.fields.lowStockThreshold,
-        },
+    },
+  });
+
+  const lowStockProducts = await prisma.product.findMany({
+    where: {
+      businessId,
+      stock: {
+        lte: prisma.product.fields.lowStockThreshold,
       },
-      take: 10,
-    }),
-    prisma.transaction.findMany({
-      where: { businessId },
-      orderBy: { createdAt: 'desc' },
-      take: 5,
-      include: {
-        items: true,
-        staff: true,
-      },
-    }),
-    prisma.business.findUnique({
-      where: { id: businessId },
-    }),
-  ]);
+    },
+    take: 10,
+  });
+
+  const recentTransactions = await prisma.transaction.findMany({
+    where: { businessId },
+    orderBy: { createdAt: 'desc' },
+    take: 5,
+    include: {
+      items: true,
+      staff: true,
+    },
+  });
+
+  const business = await prisma.business.findUnique({
+    where: { id: businessId },
+  });
 
   const todayRevenue = todayTransactions.reduce((sum, t) => sum + t.total, 0);
   const todayProfit = todayTransactions.reduce((sum, t) => sum + t.profit, 0);

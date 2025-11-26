@@ -29,6 +29,7 @@
     "loginWithTelegram": "Login with Telegram",
     "loggingIn": "Logging in...",
     "loginFailed": "Login failed. Please try again.",
+    "telegramWebNotSupported": "Please open this app in the Telegram mobile app",
     "unauthorized": "Unauthorized access",
     "loggedOut": "You have been logged out"
   },
@@ -136,7 +137,9 @@
     "saleComplete": "Sale Complete!",
     "printReceipt": "Print Receipt",
     "newSale": "New Sale",
-    "itemsInCart": "{count} items in cart"
+    "itemsInCart": "{count} items in cart",
+    "items": "items",
+    "scanProducts": "Scan products to add to cart"
   },
   "reports": {
     "title": "Reports",

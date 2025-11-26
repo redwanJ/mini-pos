@@ -293,9 +293,9 @@ export default function OnboardingPage() {
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -20 }}
-      className="card max-h-[80vh] flex flex-col"
+      className="card flex flex-col modal-container-lg"
     >
-      <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+      <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
         <button
           onClick={() => setStep('choice')}
           className="flex items-center gap-2 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
@@ -305,7 +305,7 @@ export default function OnboardingPage() {
         </button>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 modal-scroll">
         <div>
           <label className="label">{t('businessName')}</label>
           <input
@@ -339,13 +339,16 @@ export default function OnboardingPage() {
             {error}
           </div>
         )}
+
+        {/* Extra padding at bottom */}
+        <div className="h-4" />
       </div>
 
-      <div className="p-4 border-t border-gray-200 dark:border-gray-700 safe-bottom">
+      <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 flex-shrink-0 safe-bottom">
         <button
           onClick={handleCreateBusiness}
           disabled={loading || !businessName.trim()}
-          className="w-full btn btn-primary py-3"
+          className="w-full btn btn-primary py-3 text-base"
         >
           {loading ? (
             <>
@@ -365,9 +368,9 @@ export default function OnboardingPage() {
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -20 }}
-      className="card max-h-[80vh] flex flex-col"
+      className="card flex flex-col modal-container-lg"
     >
-      <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+      <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
         <button
           onClick={() => setStep('choice')}
           className="flex items-center gap-2 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
@@ -377,7 +380,7 @@ export default function OnboardingPage() {
         </button>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 modal-scroll">
         <div>
           <label className="label">{t('inviteCode')}</label>
           <input
@@ -396,13 +399,16 @@ export default function OnboardingPage() {
             {error}
           </div>
         )}
+
+        {/* Extra padding at bottom */}
+        <div className="h-4" />
       </div>
 
-      <div className="p-4 border-t border-gray-200 dark:border-gray-700 safe-bottom">
+      <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 flex-shrink-0 safe-bottom">
         <button
           onClick={handleJoinWithCode}
           disabled={loading || !inviteCode.trim()}
-          className="w-full btn btn-primary py-3"
+          className="w-full btn btn-primary py-3 text-base"
         >
           {loading ? (
             <>
