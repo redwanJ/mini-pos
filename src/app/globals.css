@@ -144,6 +144,60 @@ body {
   padding-top: env(safe-area-inset-top, 0px);
 }
 
+/* Modal keyboard handling for mobile */
+.modal-content {
+  max-height: calc(100vh - env(safe-area-inset-bottom, 0px));
+  max-height: calc(100dvh - env(safe-area-inset-bottom, 0px));
+}
+
+/* Modal container max height with fallback */
+.modal-container {
+  max-height: calc(100vh - 2rem);
+}
+
+@supports (height: 100dvh) {
+  .modal-container {
+    max-height: calc(100dvh - 2rem);
+  }
+}
+
+.modal-container-lg {
+  max-height: calc(100vh - 4rem);
+}
+
+@supports (height: 100dvh) {
+  .modal-container-lg {
+    max-height: calc(100dvh - 4rem);
+  }
+}
+
+/* Ensure modal buttons are always visible above keyboard */
+.modal-footer {
+  position: sticky;
+  bottom: 0;
+  background: inherit;
+  z-index: 10;
+}
+
+/* Better scrolling for modal content */
+.modal-scroll {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+/* Fix for iOS keyboard viewport */
+@supports (-webkit-touch-callout: none) {
+  .modal-content {
+    max-height: -webkit-fill-available;
+  }
+}
+
+/* Input placeholder styling */
+.input::placeholder {
+  color: #9ca3af;
+  opacity: 1;
+}
+
 /* Amharic font support */
 @font-face {
   font-family: 'Noto Sans Ethiopic';

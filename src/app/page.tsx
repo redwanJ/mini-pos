@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Loader2, LogIn } from 'lucide-react';
@@ -24,6 +24,7 @@ declare global {
         expand: () => void;
         setHeaderColor: (color: string) => void;
         setBackgroundColor: (color: string) => void;
+        platform?: string;
       };
     };
   }
@@ -34,8 +35,13 @@ export default function HomePage() {
   const t = useTranslations('auth');
   const [status, setStatus] = useState<'loading' | 'logged_out' | 'error'>('loading');
   const [error, setError] = useState<string | null>(null);
+  const authAttempted = useRef(false);
 
   useEffect(() => {
+    // Prevent multiple authentication attempts
+    if (authAttempted.current) return;
+    authAttempted.current = true;
+
     async function authenticate() {
       try {
         // Check if user explicitly logged out
@@ -45,19 +51,32 @@ export default function HomePage() {
           return;
         }
 
+        // Check if already authenticated (has session cookie)
+        const hasSession = document.cookie.includes('session=');
+        if (hasSession) {
+          // Try to go to dashboard directly
+          router.replace('/dashboard');
+          return;
+        }
+
         // Wait for Telegram WebApp to be ready
-        await new Promise((resolve) => setTimeout(resolve, 100));
+        await new Promise((resolve) => setTimeout(resolve, 200));
 
         const tg = window.Telegram?.WebApp;
 
         if (tg) {
           tg.ready();
           tg.expand();
-          tg.setHeaderColor('#3b82f6');
-          tg.setBackgroundColor('#f9fafb');
+          try {
+            tg.setHeaderColor('#3b82f6');
+            tg.setBackgroundColor('#f9fafb');
+          } catch {
+            // Some platforms don't support these methods
+          }
         }
 
         const initData = tg?.initData || '';
+        const platform = tg?.platform || 'unknown';
 
         // In development, allow mock data
         if (!initData && process.env.NODE_ENV === 'development') {
@@ -87,8 +106,17 @@ export default function HomePage() {
           return;
         }
 
+        // Check if running in Telegram Web (browser) vs native app
+        const isTelegramWeb = platform === 'web' || platform === 'weba';
+
         if (!initData) {
-          setError(t('loginFailed'));
+          // If no init data and not in development, show error
+          // But for Telegram Web, we might need to handle differently
+          if (isTelegramWeb) {
+            setError(t('telegramWebNotSupported') || t('loginFailed'));
+          } else {
+            setError(t('loginFailed'));
+          }
           setStatus('error');
           return;
         }
@@ -107,7 +135,7 @@ export default function HomePage() {
         }
       } catch (err) {
         console.error('Authentication error:', err);
-        setError(t('loginFailed'));
+        setError(err instanceof Error ? err.message : t('loginFailed'));
         setStatus('error');
       }
     }
@@ -117,7 +145,9 @@ export default function HomePage() {
 
   const handleLogin = () => {
     localStorage.removeItem('logged_out');
+    authAttempted.current = false;
     setStatus('loading');
+    setError(null);
     window.location.reload();
   };
 
