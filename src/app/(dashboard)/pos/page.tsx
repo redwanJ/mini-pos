@@ -171,7 +171,6 @@ export default function POSPage() {
       <ScannerModal
         isOpen={showScanner}
         onClose={() => setShowScanner(false)}
-        itemCount={itemCount}
         onProductScanned={(product) => addToCart(product, true)}
       />
 
