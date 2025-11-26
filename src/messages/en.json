@@ -22,7 +22,8 @@
     "info": "Info",
     "noData": "No data available",
     "required": "Required",
-    "optional": "Optional"
+    "optional": "Optional",
+    "installApp": "Install App"
   },
   "auth": {
     "welcome": "Welcome to Mini POS",

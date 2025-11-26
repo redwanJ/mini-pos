@@ -17,23 +17,7 @@ export async function GET() {
       return NextResponse.json({ error: 'No business found' }, { status: 400 });
     }
 
-    // Get owner
-    const business = await prisma.business.findUnique({
-      where: { id: businessId },
-      include: {
-        owner: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            username: true,
-            photoUrl: true,
-          },
-        },
-      },
-    });
-
-    // Get all members
+    // Get all members (including owner)
     const members = await prisma.businessMember.findMany({
       where: { businessId },
       include: {
@@ -65,37 +49,26 @@ export async function GET() {
       },
     });
 
-    const staff = [
-      {
-        id: business?.owner.id,
-        name: `${business?.owner.firstName} ${business?.owner.lastName || ''}`.trim(),
-        username: business?.owner.username,
-        photoUrl: business?.owner.photoUrl,
-        role: 'OWNER',
-        permissions: {
-          canAddProducts: true,
-          canEditProducts: true,
-          canDeleteProducts: true,
-          canViewReports: true,
-          canManageStaff: true,
-        },
+    const staff = members.map((m) => ({
+      id: m.user.id,
+      memberId: m.id,
+      name: `${m.user.firstName} ${m.user.lastName || ''}`.trim(),
+      username: m.user.username,
+      photoUrl: m.user.photoUrl,
+      role: m.role,
+      permissions: {
+        canAddProducts: m.canAddProducts,
+        canEditProducts: m.canEditProducts,
+        canDeleteProducts: m.canDeleteProducts,
+        canViewReports: m.canViewReports,
+        canManageStaff: m.canManageStaff,
       },
-      ...members.map((m) => ({
-        id: m.user.id,
-        memberId: m.id,
-        name: `${m.user.firstName} ${m.user.lastName || ''}`.trim(),
-        username: m.user.username,
-        photoUrl: m.user.photoUrl,
-        role: m.role,
-        permissions: {
-          canAddProducts: m.canAddProducts,
-          canEditProducts: m.canEditProducts,
-          canDeleteProducts: m.canDeleteProducts,
-          canViewReports: m.canViewReports,
-          canManageStaff: m.canManageStaff,
-        },
-      })),
-    ];
+    }));
+
+    const business = await prisma.business.findUnique({
+      where: { id: businessId },
+      select: { inviteCode: true },
+    });
 
     return NextResponse.json({
       staff,

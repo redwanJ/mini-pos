@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import prisma from '@/lib/db';
+import { sendMessage } from '@/lib/telegram';
 
 export async function POST(request: NextRequest) {
   try {
@@ -54,6 +55,22 @@ export async function POST(request: NextRequest) {
             threshold: updatedProduct.lowStockThreshold,
           },
         });
+
+        // Send Telegram notification
+        const business = await prisma.business.findUnique({
+          where: { id: businessId },
+          include: { owner: true },
+        });
+
+        if (business?.owner?.telegramId && process.env.TELEGRAM_BOT_TOKEN) {
+          const message = `⚠️ <b>Low Stock Alert</b>\n\nProduct: <b>${updatedProduct.name}</b>\nCurrent Stock: <b>${updatedProduct.stock}</b>\nThreshold: <b>${updatedProduct.lowStockThreshold}</b>`;
+
+          await sendMessage(
+            business.owner.telegramId.toString(),
+            message,
+            process.env.TELEGRAM_BOT_TOKEN
+          );
+        }
       }
     }
 

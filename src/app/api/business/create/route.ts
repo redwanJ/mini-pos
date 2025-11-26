@@ -38,13 +38,30 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create the business
-    const business = await prisma.business.create({
-      data: {
-        name: name.trim(),
-        currency,
-        ownerId: userId,
-      },
+    // Create the business and add owner as member
+    const business = await prisma.$transaction(async (tx) => {
+      const newBusiness = await tx.business.create({
+        data: {
+          name: name.trim(),
+          currency,
+          ownerId: userId,
+        },
+      });
+
+      await tx.businessMember.create({
+        data: {
+          userId,
+          businessId: newBusiness.id,
+          role: 'OWNER',
+          canAddProducts: true,
+          canEditProducts: true,
+          canDeleteProducts: true,
+          canViewReports: true,
+          canManageStaff: true,
+        },
+      });
+
+      return newBusiness;
     });
 
     // Update session cookie with business ID

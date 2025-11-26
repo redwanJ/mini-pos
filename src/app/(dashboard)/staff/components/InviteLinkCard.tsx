@@ -55,7 +55,7 @@ export function InviteLinkCard({ businessName, className }: InviteLinkCardProps)
   function shareViaTelegram() {
     if (!invite?.inviteLink) return;
     const message = encodeURIComponent(
-      `${t('telegramInviteMessage', { businessName })}\n\n${invite.inviteLink}`
+      t('telegramInviteMessage', { businessName })
     );
     const url = `https://t.me/share/url?url=${encodeURIComponent(invite.inviteLink)}&text=${message}`;
     window.open(url, '_blank');

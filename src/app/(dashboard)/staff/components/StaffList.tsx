@@ -24,6 +24,7 @@ interface StaffMember {
 interface StaffListProps {
   staff: StaffMember[];
   isOwner: boolean;
+  currentUserId?: string;
   onEdit: (member: StaffMember) => void;
   onRemove: (memberId: string) => void;
 }
@@ -50,7 +51,7 @@ function getRoleColor(role: string) {
   }
 }
 
-export function StaffList({ staff, isOwner, onEdit, onRemove }: StaffListProps) {
+export function StaffList({ staff, isOwner, currentUserId, onEdit, onRemove }: StaffListProps) {
   const t = useTranslations('staff');
 
   if (staff.length === 0) {
@@ -66,6 +67,7 @@ export function StaffList({ staff, isOwner, onEdit, onRemove }: StaffListProps) 
       {staff.map((member) => {
         const RoleIcon = getRoleIcon(member.role);
         const roleColor = getRoleColor(member.role);
+        const canEdit = isOwner && member.id !== currentUserId;
 
         return (
           <div key={member.id} className="card p-4">
@@ -94,7 +96,7 @@ export function StaffList({ staff, isOwner, onEdit, onRemove }: StaffListProps) 
                   </span>
                 </div>
               </div>
-              {isOwner && member.role !== 'OWNER' && member.memberId && (
+              {canEdit && (
                 <div className="flex gap-1">
                   <button
                     onClick={() => onEdit(member)}
@@ -102,12 +104,14 @@ export function StaffList({ staff, isOwner, onEdit, onRemove }: StaffListProps) 
                   >
                     <Edit2 className="w-5 h-5" />
                   </button>
-                  <button
-                    onClick={() => onRemove(member.memberId!)}
-                    className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg"
-                  >
-                    <Trash2 className="w-5 h-5" />
-                  </button>
+                  {member.role !== 'OWNER' && member.memberId && (
+                    <button
+                      onClick={() => onRemove(member.memberId!)}
+                      className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg"
+                    >
+                      <Trash2 className="w-5 h-5" />
+                    </button>
+                  )}
                 </div>
               )}
             </div>

@@ -18,9 +18,10 @@ interface EditRoleModalProps {
   onClose: () => void;
   member: StaffMember | null;
   onUpdateRole: (memberId: string, newRole: 'MANAGER' | 'STAFF') => Promise<void>;
+  onRemove: (memberId: string) => Promise<void>;
 }
 
-export function EditRoleModal({ isOpen, onClose, member, onUpdateRole }: EditRoleModalProps) {
+export function EditRoleModal({ isOpen, onClose, member, onUpdateRole, onRemove }: EditRoleModalProps) {
   const t = useTranslations('staff');
   const [saving, setSaving] = useState(false);
 
@@ -29,6 +30,17 @@ export function EditRoleModal({ isOpen, onClose, member, onUpdateRole }: EditRol
     setSaving(true);
     try {
       await onUpdateRole(member.memberId, newRole);
+      onClose();
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleRemove() {
+    if (!member?.memberId) return;
+    setSaving(true);
+    try {
+      await onRemove(member.memberId);
       onClose();
     } finally {
       setSaving(false);
@@ -51,11 +63,10 @@ export function EditRoleModal({ isOpen, onClose, member, onUpdateRole }: EditRol
         <button
           onClick={() => handleRoleChange('MANAGER')}
           disabled={saving}
-          className={`w-full p-3 rounded-lg flex items-center gap-3 transition-colors ${
-            member.role === 'MANAGER'
+          className={`w-full p-3 rounded-lg flex items-center gap-3 transition-colors ${member.role === 'MANAGER'
               ? 'bg-blue-100 dark:bg-blue-900/30 ring-2 ring-blue-500'
               : 'bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600'
-          }`}
+            }`}
         >
           <Shield className="w-5 h-5 text-blue-600" />
           <div className="text-left">
@@ -69,11 +80,10 @@ export function EditRoleModal({ isOpen, onClose, member, onUpdateRole }: EditRol
         <button
           onClick={() => handleRoleChange('STAFF')}
           disabled={saving}
-          className={`w-full p-3 rounded-lg flex items-center gap-3 transition-colors ${
-            member.role === 'STAFF'
+          className={`w-full p-3 rounded-lg flex items-center gap-3 transition-colors ${member.role === 'STAFF'
               ? 'bg-blue-100 dark:bg-blue-900/30 ring-2 ring-blue-500'
               : 'bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600'
-          }`}
+            }`}
         >
           <User className="w-5 h-5 text-gray-600" />
           <div className="text-left">
@@ -83,6 +93,16 @@ export function EditRoleModal({ isOpen, onClose, member, onUpdateRole }: EditRol
           {member.role === 'STAFF' && (
             <Check className="w-5 h-5 text-blue-600 ml-auto" />
           )}
+        </button>
+      </div>
+
+      <div className="mt-6 pt-4 border-t border-gray-100 dark:border-gray-700">
+        <button
+          onClick={handleRemove}
+          disabled={saving}
+          className="w-full p-3 text-red-600 bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/30 rounded-lg transition-colors text-sm font-medium"
+        >
+          {t('removeStaff')}
         </button>
       </div>
 

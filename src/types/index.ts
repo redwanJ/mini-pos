@@ -20,6 +20,8 @@ declare global {
         disableClosingConfirmation: () => void;
         setHeaderColor: (color: string) => void;
         setBackgroundColor: (color: string) => void;
+        addToHomeScreen: () => void;
+        checkHomeScreenStatus: (callback: (status: string) => void) => void;
         platform?: string;
       };
     };

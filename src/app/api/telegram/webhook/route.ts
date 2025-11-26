@@ -103,6 +103,12 @@ async function handleInvite(
             },
         });
 
+        // Check if user is the owner
+        if (invite.business.ownerId === user.id) {
+            await sendMessage(chatId, `You are the owner of ${invite.business.name} and cannot join as staff.`, BOT_TOKEN);
+            return;
+        }
+
         if (existingMember) {
             await sendMessage(chatId, `You are already a member of ${invite.business.name}.`, BOT_TOKEN);
             return;

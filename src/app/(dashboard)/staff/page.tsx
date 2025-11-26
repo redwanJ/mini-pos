@@ -12,6 +12,7 @@ import {
   EditRoleModal,
   InviteStaffModal,
 } from './components';
+import { InstallPrompt } from '@/components/InstallPrompt';
 
 interface StaffMember {
   id: string;
@@ -39,7 +40,7 @@ interface PendingRequest {
 
 export default function StaffPage() {
   const t = useTranslations('staff');
-  const { isOwner } = useSession();
+  const { isOwner, session } = useSession();
 
   const [staff, setStaff] = useState<StaffMember[]>([]);
   const [pendingRequests, setPendingRequests] = useState<PendingRequest[]>([]);
@@ -164,15 +165,18 @@ export default function StaffPage() {
       <PageHeader
         title={t('title')}
         action={
-          isOwner ? (
-            <button
-              onClick={() => setShowInviteModal(true)}
-              className="btn btn-primary hidden sm:flex"
-            >
-              <UserPlus className="w-4 h-4 mr-2" />
-              {t('inviteStaff')}
-            </button>
-          ) : undefined
+          <div className="flex items-center gap-2">
+            <InstallPrompt />
+            {isOwner && (
+              <button
+                onClick={() => setShowInviteModal(true)}
+                className="btn btn-primary hidden sm:flex"
+              >
+                <UserPlus className="w-4 h-4 mr-2" />
+                {t('inviteStaff')}
+              </button>
+            )}
+          </div>
         }
       />
 
@@ -188,6 +192,7 @@ export default function StaffPage() {
         <StaffList
           staff={staff}
           isOwner={isOwner}
+          currentUserId={session?.userId}
           onEdit={setEditingMember}
           onRemove={handleRemove}
         />
@@ -206,6 +211,7 @@ export default function StaffPage() {
         onClose={() => setEditingMember(null)}
         member={editingMember}
         onUpdateRole={handleUpdateRole}
+        onRemove={handleRemove}
       />
 
       <InviteStaffModal
