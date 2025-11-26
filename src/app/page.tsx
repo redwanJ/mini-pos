@@ -5,30 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Loader2, LogIn } from 'lucide-react';
 import { fetchApi } from '@/lib/api';
-
-declare global {
-  interface Window {
-    Telegram?: {
-      WebApp?: {
-        initData: string;
-        initDataUnsafe: {
-          user?: {
-            id: number;
-            first_name: string;
-            last_name?: string;
-            username?: string;
-            language_code?: string;
-          };
-        };
-        ready: () => void;
-        expand: () => void;
-        setHeaderColor: (color: string) => void;
-        setBackgroundColor: (color: string) => void;
-        platform?: string;
-      };
-    };
-  }
-}
+import '@/types'; // Import Telegram type declarations
 
 export default function HomePage() {
   const router = useRouter();
@@ -63,18 +40,6 @@ export default function HomePage() {
         await new Promise((resolve) => setTimeout(resolve, 200));
 
         const tg = window.Telegram?.WebApp;
-
-        if (tg) {
-          tg.ready();
-          tg.expand();
-          try {
-            tg.setHeaderColor('#3b82f6');
-            tg.setBackgroundColor('#f9fafb');
-          } catch {
-            // Some platforms don't support these methods
-          }
-        }
-
         const initData = tg?.initData || '';
         const platform = tg?.platform || 'unknown';
 
