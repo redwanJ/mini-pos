@@ -106,20 +106,44 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    // Build list of accessible businesses
+    const businesses: Array<{ id: string; name: string; role: string }> = [];
+
+    if (user.ownedBusiness) {
+      businesses.push({
+        id: user.ownedBusiness.id,
+        name: user.ownedBusiness.name,
+        role: 'OWNER',
+      });
+    }
+
+    for (const membership of user.memberships) {
+      businesses.push({
+        id: membership.business.id,
+        name: membership.business.name,
+        role: membership.role,
+      });
+    }
+
     // Determine business context
     let businessId: string | null = null;
     let role: string | null = null;
     let needsOnboarding = false;
+    let needsBusinessSelection = false;
 
-    if (user.ownedBusiness) {
-      businessId = user.ownedBusiness.id;
-      role = 'OWNER';
-    } else if (user.memberships.length > 0) {
-      businessId = user.memberships[0].businessId;
-      role = user.memberships[0].role;
-    } else {
+    if (businesses.length === 0) {
       // User needs to create or join a business
       needsOnboarding = true;
+    } else if (businesses.length === 1) {
+      // Automatically select the only business
+      businessId = businesses[0].id;
+      role = businesses[0].role;
+    } else {
+      // User has multiple businesses - need to select one
+      // For now, use the first owned business or first membership
+      businessId = businesses[0].id;
+      role = businesses[0].role;
+      needsBusinessSelection = true;
     }
 
     // Set session cookie
@@ -155,6 +179,8 @@ export async function POST(request: NextRequest) {
       businessId,
       role,
       needsOnboarding,
+      needsBusinessSelection,
+      businesses,
       pendingRequest: user.joinRequests.length > 0 ? {
         businessName: user.joinRequests[0].business.name,
         status: user.joinRequests[0].status,

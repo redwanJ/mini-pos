@@ -100,10 +100,12 @@ export default function POSPage() {
     return () => clearTimeout(debounce);
   }, [searchProducts]);
 
-  const addToCart = useCallback((product: Product) => {
+  const addToCart = useCallback((product: Product, incrementIfExists: boolean = true) => {
     setCart((prev) => {
       const existing = prev.find((item) => item.id === product.id);
       if (existing) {
+        // If incrementIfExists is false (from scanner), don't add more quantity
+        if (!incrementIfExists) return prev;
         if (existing.quantity >= product.stock) return prev;
         return prev.map((item) =>
           item.id === product.id
@@ -125,7 +127,8 @@ export default function POSPage() {
       );
       if (response.ok) {
         const data = await response.json();
-        addToCart(data.product);
+        // Pass false to not increment quantity if product already in cart
+        addToCart(data.product, false);
         setShowScanner(false);
       }
     } catch {
@@ -240,7 +243,7 @@ export default function POSPage() {
   }
 
   return (
-    <div className="flex flex-col h-[calc(100vh-4rem)]">
+    <div className="flex flex-col h-[calc(100vh-8rem)]">
       <PageHeader
         title={t('title')}
         subtitle={itemCount > 0 ? t('itemsInCart', { count: itemCount }) : undefined}
@@ -320,7 +323,7 @@ export default function POSPage() {
 
       {/* Checkout Bar */}
       {cart.length > 0 && (
-        <div className="border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4 space-y-3">
+        <div className="border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4 pb-6 space-y-3 safe-bottom">
           <div className="flex justify-between text-sm">
             <span className="text-gray-500">{t('subtotal')}</span>
             <span className="font-medium">{formatCurrency(subtotal, currency)}</span>

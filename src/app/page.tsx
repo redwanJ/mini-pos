@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { Loader2 } from 'lucide-react';
+import { Loader2, LogIn } from 'lucide-react';
 import { fetchApi } from '@/lib/api';
 
 declare global {
@@ -32,12 +32,19 @@ declare global {
 export default function HomePage() {
   const router = useRouter();
   const t = useTranslations('auth');
-  const [status, setStatus] = useState<'loading' | 'error'>('loading');
+  const [status, setStatus] = useState<'loading' | 'logged_out' | 'error'>('loading');
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     async function authenticate() {
       try {
+        // Check if user explicitly logged out
+        const isLoggedOut = localStorage.getItem('logged_out') === 'true';
+        if (isLoggedOut) {
+          setStatus('logged_out');
+          return;
+        }
+
         // Wait for Telegram WebApp to be ready
         await new Promise((resolve) => setTimeout(resolve, 100));
 
@@ -73,9 +80,9 @@ export default function HomePage() {
           });
 
           if (data.needsOnboarding) {
-            router.push('/onboarding');
+            router.replace('/onboarding');
           } else {
-            router.push('/dashboard');
+            router.replace('/dashboard');
           }
           return;
         }
@@ -94,9 +101,9 @@ export default function HomePage() {
         });
 
         if (data.needsOnboarding) {
-          router.push('/onboarding');
+          router.replace('/onboarding');
         } else {
-          router.push('/dashboard');
+          router.replace('/dashboard');
         }
       } catch (err) {
         console.error('Authentication error:', err);
@@ -107,6 +114,32 @@ export default function HomePage() {
 
     authenticate();
   }, [router, t]);
+
+  const handleLogin = () => {
+    localStorage.removeItem('logged_out');
+    setStatus('loading');
+    window.location.reload();
+  };
+
+  if (status === 'logged_out') {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center p-4">
+        <div className="text-center">
+          <h1 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+            {t('welcome')}
+          </h1>
+          <p className="text-gray-500 dark:text-gray-400 mb-4">{t('loggedOut')}</p>
+          <button
+            onClick={handleLogin}
+            className="btn btn-primary"
+          >
+            <LogIn className="w-4 h-4 mr-2" />
+            {t('loginWithTelegram')}
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   if (status === 'error') {
     return (
