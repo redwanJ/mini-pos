@@ -154,7 +154,6 @@ export function ProductFormModal({
       isOpen={isOpen}
       onClose={onClose}
       title={product ? t('editProduct') : t('addProduct')}
-      footer={footer}
     >
       <div className="space-y-4">
         <div>
@@ -218,9 +217,24 @@ export function ProductFormModal({
           categories={categories}
           selectedCategoryId={formData.categoryId}
           newCategoryName={formData.newCategory}
-          onSelectCategory={(id) => setFormData({ ...formData, categoryId: id })}
-          onNewCategory={(name) => setFormData({ ...formData, newCategory: name })}
+          onSelectCategory={(id) => setFormData((prev) => ({ ...prev, categoryId: id }))}
+          onNewCategory={(name) => setFormData((prev) => ({ ...prev, newCategory: name }))}
         />
+
+        <button
+          onClick={handleSave}
+          disabled={saving}
+          className="w-full btn btn-primary py-3 text-base"
+        >
+          {saving ? (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin mr-2" />
+              {tCommon('loading')}
+            </>
+          ) : (
+            tCommon('save')
+          )}
+        </button>
 
         {formError && <AlertMessage type="error" message={formError} />}
       </div>
