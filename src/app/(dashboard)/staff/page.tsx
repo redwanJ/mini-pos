@@ -445,9 +445,9 @@ export default function StaffPage() {
               animate={{ y: 0 }}
               exit={{ y: '100%' }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-white dark:bg-gray-800 w-full sm:max-w-md sm:rounded-xl rounded-t-xl p-6"
+              className="bg-white dark:bg-gray-800 w-full sm:max-w-md sm:rounded-xl rounded-t-xl max-h-[90vh] flex flex-col"
             >
-              <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center justify-between p-6 pb-4 border-b border-gray-200 dark:border-gray-700">
                 <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
                   {t('editStaff')}
                 </h2>
@@ -459,60 +459,62 @@ export default function StaffPage() {
                 </button>
               </div>
 
-              <div className="mb-4">
-                <p className="font-medium text-gray-900 dark:text-white mb-1">
-                  {editingMember.name}
-                </p>
-                {editingMember.username && (
-                  <p className="text-sm text-gray-500">@{editingMember.username}</p>
+              <div className="flex-1 overflow-y-auto p-6 pt-4">
+                <div className="mb-4">
+                  <p className="font-medium text-gray-900 dark:text-white mb-1">
+                    {editingMember.name}
+                  </p>
+                  {editingMember.username && (
+                    <p className="text-sm text-gray-500">@{editingMember.username}</p>
+                  )}
+                </div>
+
+                <div className="space-y-3">
+                  <label className="label">{t('role')}</label>
+                  <button
+                    onClick={() => handleUpdateRole(editingMember.memberId!, 'MANAGER')}
+                    disabled={saving}
+                    className={`w-full p-3 rounded-lg flex items-center gap-3 transition-colors ${
+                      editingMember.role === 'MANAGER'
+                        ? 'bg-blue-100 dark:bg-blue-900/30 ring-2 ring-blue-500'
+                        : 'bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600'
+                    }`}
+                  >
+                    <Shield className="w-5 h-5 text-blue-600" />
+                    <div className="text-left">
+                      <p className="font-medium">{t('manager')}</p>
+                      <p className="text-xs text-gray-500">{t('managerDesc')}</p>
+                    </div>
+                    {editingMember.role === 'MANAGER' && (
+                      <Check className="w-5 h-5 text-blue-600 ml-auto" />
+                    )}
+                  </button>
+                  <button
+                    onClick={() => handleUpdateRole(editingMember.memberId!, 'STAFF')}
+                    disabled={saving}
+                    className={`w-full p-3 rounded-lg flex items-center gap-3 transition-colors ${
+                      editingMember.role === 'STAFF'
+                        ? 'bg-blue-100 dark:bg-blue-900/30 ring-2 ring-blue-500'
+                        : 'bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600'
+                    }`}
+                  >
+                    <User className="w-5 h-5 text-gray-600" />
+                    <div className="text-left">
+                      <p className="font-medium">{t('staffRole')}</p>
+                      <p className="text-xs text-gray-500">{t('staffDesc')}</p>
+                    </div>
+                    {editingMember.role === 'STAFF' && (
+                      <Check className="w-5 h-5 text-blue-600 ml-auto" />
+                    )}
+                  </button>
+                </div>
+
+                {saving && (
+                  <div className="flex justify-center mt-4">
+                    <Loader2 className="w-6 h-6 animate-spin text-blue-600" />
+                  </div>
                 )}
               </div>
-
-              <div className="space-y-3">
-                <label className="label">{t('role')}</label>
-                <button
-                  onClick={() => handleUpdateRole(editingMember.memberId!, 'MANAGER')}
-                  disabled={saving}
-                  className={`w-full p-3 rounded-lg flex items-center gap-3 transition-colors ${
-                    editingMember.role === 'MANAGER'
-                      ? 'bg-blue-100 dark:bg-blue-900/30 ring-2 ring-blue-500'
-                      : 'bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600'
-                  }`}
-                >
-                  <Shield className="w-5 h-5 text-blue-600" />
-                  <div className="text-left">
-                    <p className="font-medium">{t('manager')}</p>
-                    <p className="text-xs text-gray-500">{t('managerDesc')}</p>
-                  </div>
-                  {editingMember.role === 'MANAGER' && (
-                    <Check className="w-5 h-5 text-blue-600 ml-auto" />
-                  )}
-                </button>
-                <button
-                  onClick={() => handleUpdateRole(editingMember.memberId!, 'STAFF')}
-                  disabled={saving}
-                  className={`w-full p-3 rounded-lg flex items-center gap-3 transition-colors ${
-                    editingMember.role === 'STAFF'
-                      ? 'bg-blue-100 dark:bg-blue-900/30 ring-2 ring-blue-500'
-                      : 'bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600'
-                  }`}
-                >
-                  <User className="w-5 h-5 text-gray-600" />
-                  <div className="text-left">
-                    <p className="font-medium">{t('staffRole')}</p>
-                    <p className="text-xs text-gray-500">{t('staffDesc')}</p>
-                  </div>
-                  {editingMember.role === 'STAFF' && (
-                    <Check className="w-5 h-5 text-blue-600 ml-auto" />
-                  )}
-                </button>
-              </div>
-
-              {saving && (
-                <div className="flex justify-center mt-4">
-                  <Loader2 className="w-6 h-6 animate-spin text-blue-600" />
-                </div>
-              )}
             </motion.div>
           </motion.div>
         )}
