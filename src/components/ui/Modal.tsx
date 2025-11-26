@@ -28,7 +28,7 @@ export function Modal({
       case 'full':
         return 'bg-white dark:bg-gray-800 w-full h-full';
       default:
-        return 'bg-white dark:bg-gray-800 w-full sm:max-w-md sm:rounded-xl rounded-t-xl flex flex-col modal-container';
+        return 'bg-white dark:bg-gray-800 w-full sm:max-w-md sm:rounded-xl rounded-t-xl flex flex-col max-h-[90vh]';
     }
   };
 
@@ -95,7 +95,7 @@ export function Modal({
             </div>
 
             {/* Content */}
-            <div className="flex-1 overflow-y-auto p-4 sm:p-6 pt-3 sm:pt-4 modal-scroll">
+            <div className="flex-1 overflow-y-auto p-4 sm:p-6 pt-3 sm:pt-4 min-h-0">
               {children}
             </div>
 
