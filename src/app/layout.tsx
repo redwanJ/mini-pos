@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { NextIntlClientProvider } from 'next-intl';
 import { getLocale, getMessages } from 'next-intl/server';
+import { TelegramProvider } from '@/components/TelegramProvider';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -39,7 +40,9 @@ export default async function RootLayout({
       </head>
       <body className="tg-viewport bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 antialiased">
         <NextIntlClientProvider messages={messages}>
-          {children}
+          <TelegramProvider>
+            {children}
+          </TelegramProvider>
         </NextIntlClientProvider>
       </body>
     </html>

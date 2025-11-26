@@ -6,10 +6,9 @@ import { PageHeader } from '@/components/PageHeader';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { useSession } from '@/hooks/useSession';
 import {
-  InviteCard,
+  InviteLinkCard,
   PendingRequests,
   StaffList,
-  InviteQRModal,
   EditRoleModal,
 } from './components';
 
@@ -43,10 +42,8 @@ export default function StaffPage() {
 
   const [staff, setStaff] = useState<StaffMember[]>([]);
   const [pendingRequests, setPendingRequests] = useState<PendingRequest[]>([]);
-  const [inviteCode, setInviteCode] = useState('');
   const [businessName, setBusinessName] = useState('');
   const [loading, setLoading] = useState(true);
-  const [showQR, setShowQR] = useState(false);
   const [editingMember, setEditingMember] = useState<StaffMember | null>(null);
 
   const fetchStaff = useCallback(async () => {
@@ -60,7 +57,6 @@ export default function StaffPage() {
         const data = await staffRes.json();
         setStaff(data.staff);
         setPendingRequests(data.pendingRequests);
-        setInviteCode(data.inviteCode || '');
       }
 
       if (businessRes.ok) {
@@ -167,11 +163,7 @@ export default function StaffPage() {
 
       <div className="p-4 space-y-6">
         {isOwner && (
-          <InviteCard
-            inviteCode={inviteCode}
-            businessName={businessName}
-            onShowQR={() => setShowQR(true)}
-          />
+          <InviteLinkCard businessName={businessName} />
         )}
 
         {isOwner && (
@@ -189,12 +181,6 @@ export default function StaffPage() {
           onRemove={handleRemove}
         />
       </div>
-
-      <InviteQRModal
-        isOpen={showQR}
-        onClose={() => setShowQR(false)}
-        inviteCode={inviteCode}
-      />
 
       <EditRoleModal
         isOpen={!!editingMember}
