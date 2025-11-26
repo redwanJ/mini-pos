@@ -24,6 +24,7 @@ model Business {
   ownerId       String   @unique
   members       BusinessMember[]
   joinRequests  JoinRequest[]
+  staffInvites  StaffInvite[]
   products      Product[]
   transactions  Transaction[]
   categories    Category[]
@@ -92,6 +93,24 @@ model JoinRequest {
 
   @@unique([userId, businessId])
   @@index([businessId, status])
+}
+
+// Staff invitation - shareable invitation link tokens
+model StaffInvite {
+  id          String   @id @default(cuid())
+  token       String   @unique @default(cuid())
+  role        Role     @default(STAFF)
+  expiresAt   DateTime
+  usedAt      DateTime?
+  usedById    String?
+  createdAt   DateTime @default(now())
+
+  // Relations
+  business    Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  businessId  String
+
+  @@index([token])
+  @@index([businessId])
 }
 
 // Product category
