@@ -45,28 +45,9 @@ export function CheckoutModal({
 }: CheckoutModalProps) {
   const t = useTranslations('pos');
 
-  const footer = (
-    <>
-      <div className="flex justify-between text-lg font-bold mb-4">
-        <span>{t('total')}</span>
-        <span>{formatCurrency(total, currency)}</span>
-      </div>
-      <button
-        onClick={onCheckout}
-        disabled={loading}
-        className="w-full btn btn-primary py-3 text-base"
-      >
-        {loading ? (
-          <Loader2 className="w-5 h-5 animate-spin" />
-        ) : (
-          t('completeSale')
-        )}
-      </button>
-    </>
-  );
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={t('checkout')} footer={footer}>
+    <Modal isOpen={isOpen} onClose={onClose} title={t('checkout')}>
       <div className="space-y-4">
         <div>
           <label className="label">{t('discountPercent')}</label>
@@ -93,11 +74,10 @@ export function CheckoutModal({
                 <button
                   key={method.id}
                   onClick={() => onPaymentMethodChange(method.id)}
-                  className={`p-3 rounded-lg flex flex-col items-center gap-1 transition-colors ${
-                    paymentMethod === method.id
-                      ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 ring-2 ring-blue-500'
-                      : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
-                  }`}
+                  className={`p-3 rounded-lg flex flex-col items-center gap-1 transition-colors ${paymentMethod === method.id
+                    ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 ring-2 ring-blue-500'
+                    : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
+                    }`}
                 >
                   <Icon className="w-5 h-5" />
                   <span className="text-xs">{t(method.labelKey)}</span>
@@ -106,6 +86,24 @@ export function CheckoutModal({
             })}
           </div>
         </div>
+
+        <>
+          <div className="flex justify-between text-lg font-bold mb-4">
+            <span>{t('total')}</span>
+            <span>{formatCurrency(total, currency)}</span>
+          </div>
+          <button
+            onClick={onCheckout}
+            disabled={loading}
+            className="w-full btn btn-primary py-3 text-base"
+          >
+            {loading ? (
+              <Loader2 className="w-5 h-5 animate-spin" />
+            ) : (
+              t('completeSale')
+            )}
+          </button>
+        </>
       </div>
     </Modal>
   );
