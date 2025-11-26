@@ -2,6 +2,15 @@ import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import prisma from '@/lib/db';
 
+// Helper to convert BigInt to string for JSON serialization
+function serializeBigInt<T>(obj: T): T {
+  return JSON.parse(
+    JSON.stringify(obj, (_, value) =>
+      typeof value === 'bigint' ? value.toString() : value
+    )
+  );
+}
+
 // GET all transactions
 export async function GET(request: NextRequest) {
   try {
@@ -45,7 +54,7 @@ export async function GET(request: NextRequest) {
       take: limit,
     });
 
-    return NextResponse.json({ transactions });
+    return NextResponse.json({ transactions: serializeBigInt(transactions) });
   } catch (error) {
     console.error('Get transactions error:', error);
     return NextResponse.json(
@@ -193,7 +202,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    return NextResponse.json({ transaction });
+    return NextResponse.json({ transaction: serializeBigInt(transaction) });
   } catch (error) {
     console.error('Create transaction error:', error);
     return NextResponse.json(
