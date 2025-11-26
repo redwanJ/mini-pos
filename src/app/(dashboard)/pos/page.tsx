@@ -127,26 +127,10 @@ export default function POSPage() {
       );
       if (response.ok) {
         const data = await response.json();
-        // Pass true to increment quantity if product already in cart
+        // Add product with quantity 1 (increment if already in cart)
         addToCart(data.product, true);
-        // Keep scanner open for continuous scanning - user can close manually
-        // Give visual feedback by briefly pausing
-        if (scannerRef.current) {
-          try {
-            await scannerRef.current.pause(true);
-            setTimeout(async () => {
-              if (scannerRef.current) {
-                try {
-                  await scannerRef.current.resume();
-                } catch {
-                  // Ignore resume errors
-                }
-              }
-            }, 500);
-          } catch {
-            // Ignore pause errors
-          }
-        }
+        // Close scanner after successful scan - prevents infinite scanning
+        setShowScanner(false);
       }
     } catch {
       // Ignore
@@ -519,12 +503,8 @@ export default function POSPage() {
                   </div>
                 </div>
 
-                {/* Extra padding at bottom */}
-                <div className="h-4" />
-              </div>
-
-              <div className="p-4 sm:p-6 pt-3 sm:pt-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 flex-shrink-0 safe-bottom">
-                <div className="flex justify-between text-lg font-bold mb-4">
+                {/* Total and Complete Sale button inline with form */}
+                <div className="flex justify-between text-lg font-bold pt-4 border-t border-gray-200 dark:border-gray-700">
                   <span>{t('total')}</span>
                   <span>{formatCurrency(total, currency)}</span>
                 </div>
@@ -539,6 +519,9 @@ export default function POSPage() {
                     t('completeSale')
                   )}
                 </button>
+
+                {/* Extra padding at bottom for safe area */}
+                <div className="h-4 safe-bottom" />
               </div>
             </motion.div>
           </motion.div>

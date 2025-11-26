@@ -513,11 +513,7 @@ export default function ProductsPage() {
                   </div>
                 )}
 
-                {/* Extra padding at bottom to ensure button is visible when keyboard is open */}
-                <div className="h-4" />
-              </div>
-
-              <div className="p-4 sm:p-6 pt-3 sm:pt-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 flex-shrink-0 safe-bottom">
+                {/* Save button inline with form */}
                 <button
                   onClick={handleSave}
                   disabled={saving}
@@ -532,6 +528,9 @@ export default function ProductsPage() {
                     tCommon('save')
                   )}
                 </button>
+
+                {/* Extra padding at bottom for safe area */}
+                <div className="h-4 safe-bottom" />
               </div>
             </motion.div>
           </motion.div>
