@@ -21,18 +21,19 @@ export function useSession(): UseSessionReturn {
   const [session, setSession] = useState<SessionData | null>(null);
 
   useEffect(() => {
-    const sessionCookie = document.cookie
-      .split('; ')
-      .find((row) => row.startsWith('session='));
-
-    if (sessionCookie) {
+    async function fetchSession() {
       try {
-        const data = JSON.parse(decodeURIComponent(sessionCookie.split('=')[1]));
-        setSession(data);
-      } catch {
-        // Ignore
+        const response = await fetch('/api/auth/session');
+        if (response.ok) {
+          const data = await response.json();
+          setSession(data.session);
+        }
+      } catch (error) {
+        console.error('Failed to fetch session:', error);
       }
     }
+
+    fetchSession();
   }, []);
 
   const isOwner = session?.role === 'OWNER';
