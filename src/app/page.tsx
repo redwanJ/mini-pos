@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Loader2, LogIn } from 'lucide-react';
 import { fetchApi } from '@/lib/api';
@@ -9,6 +9,7 @@ import '@/types'; // Import Telegram type declarations
 
 export default function HomePage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const t = useTranslations('auth');
   const [status, setStatus] = useState<'loading' | 'logged_out' | 'error'>('loading');
   const [error, setError] = useState<string | null>(null);
@@ -21,18 +22,18 @@ export default function HomePage() {
 
     async function authenticate() {
       try {
+        // Check for error from redirect
+        const errorParam = searchParams.get('error');
+        if (errorParam === 'session_verification_failed') {
+          setError(t('sessionExpired') || 'Session verification failed');
+          setStatus('error');
+          return;
+        }
+
         // Check if user explicitly logged out
         const isLoggedOut = localStorage.getItem('logged_out') === 'true';
         if (isLoggedOut) {
           setStatus('logged_out');
-          return;
-        }
-
-        // Check if already authenticated (has session cookie)
-        const hasSession = document.cookie.includes('session=');
-        if (hasSession) {
-          // Try to go to dashboard directly
-          router.replace('/dashboard');
           return;
         }
 

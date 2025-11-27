@@ -30,6 +30,7 @@
     "loginWithTelegram": "Login with Telegram",
     "loggingIn": "Logging in...",
     "loginFailed": "Login failed. Please try again.",
+    "sessionExpired": "Session expired. Please log in again.",
     "telegramWebNotSupported": "Please open this app in the Telegram mobile app",
     "unauthorized": "Unauthorized access",
     "loggedOut": "You have been logged out"
