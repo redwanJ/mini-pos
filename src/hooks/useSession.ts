@@ -11,6 +11,7 @@ interface SessionData {
 
 interface UseSessionReturn {
   session: SessionData | null;
+  loading: boolean;
   isOwner: boolean;
   isManager: boolean;
   canManageStaff: boolean;
@@ -19,6 +20,7 @@ interface UseSessionReturn {
 
 export function useSession(): UseSessionReturn {
   const [session, setSession] = useState<SessionData | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchSession() {
@@ -30,6 +32,8 @@ export function useSession(): UseSessionReturn {
         }
       } catch (error) {
         console.error('Failed to fetch session:', error);
+      } finally {
+        setLoading(false);
       }
     }
 
@@ -41,6 +45,7 @@ export function useSession(): UseSessionReturn {
 
   return {
     session,
+    loading,
     isOwner,
     isManager,
     canManageStaff: isOwner,
